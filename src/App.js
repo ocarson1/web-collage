@@ -43,7 +43,7 @@ function App() {
 
   // UseEffect to handle the fetch operation
   useEffect(() => {
-    fetch('http://localhost:3000/fetch-trends')
+    fetch('https://web-collage-backend.onrender.com/fetch-trends')
       .then(response => response.json())
       .then(pictures => {
         // Update the state with the fetched pictures
