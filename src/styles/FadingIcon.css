@@ -1,6 +1,6 @@
 .fading-icon {
   position: absolute;
-  top: 93%;
+  top: 90%;
   left: 96%;
   transform: translate(-50%, -50%);
   transition: opacity 1s ease-in-out;
