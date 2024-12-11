@@ -1,0 +1,61 @@
+@font-face {
+  font-family: 'MyFont';
+  src: url('../public/almitra.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+.image-generator-container {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* or set a specific height */
+  overflow: hidden; /* Change from 'auto' to 'hidden' */
+}
+
+.instructions {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 0;
+}
+
+.draggable-image {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  resize: both;
+  overflow: hidden;
+  border: 1px solid transparent;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.generated-image {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.image-metadata {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255,255,255,0.2); 
+  border: 2px solid white; 
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+  padding: 10px;
+  text-align: left;
+  overflow: hidden;
+  position: 'relative'
+}
+

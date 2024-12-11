@@ -1,0 +1,27 @@
+.fading-icon {
+  position: absolute;
+  top: 93%;
+  left: 97%;
+  transform: translate(-50%, -50%);
+  transition: opacity 1s ease-in-out;
+  z-index: 1000; /* Ensures icon appears above other content */
+}
+
+.fading-icon.visible {
+  opacity: 1;
+}
+
+.fading-icon.fast-fade {
+  transition: opacity 0.1s linear; /* Very quick, almost instant fade */
+}
+
+.fading-icon.hidden {
+  opacity: 0;
+  pointer-events: none; /* Prevents interaction with hidden icon */
+}
+
+.centered-icon {
+  max-width: 100px;
+  max-height: 100px;
+  display: block;
+}
