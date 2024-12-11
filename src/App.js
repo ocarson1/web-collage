@@ -69,11 +69,11 @@ function App() {
 
         <div className="grid-container">
           <div style={{ lineHeight: "1.25" }}>
-            <p><span className="bold">⁕&nbsp;&nbsp;</span>   Generate images using <span className="key-input" style={{border: `1.75px solid ${textColor}` }}>a</span> → <span className="key-input" style={{border: `1.75px solid ${textColor}` }}>z</span></p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Hold <span className="key-input"style={{border: `1.75px solid ${textColor}` }} >Shift</span> to view image info</p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Resize images by dragging the bottom right corner </p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Right click on images to remove them </p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing will clear the page </p></div>
+            <p style={{ lineHeight: "1.25" }}><span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>   Generate images using keyboard input <span className="key-input" style={{border: `1.75px solid ${textColor}` }}>a</span> → <span className="key-input" style={{border: `1.75px solid ${textColor}` }}>z</span>.</p>
+            <p style={{ lineHeight: "1.25" }}><span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp; </span>   Hold <span className="key-input"style={{border: `1.75px solid ${textColor}` }} >Shift</span> to view image details.</p>
+            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Expand an image by dragging its bottom-right corner.</p>
+            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Right-click on an image to remove it.</p>
+            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing the page will clear all content. </p></div>
           {/* <p><span className="bold">①</span>  Generate images using <span className="key-input">a</span> - <span className="key-input">z</span></p>
             <p><span className="bold">②</span>  Hold <span className="key-input">Shift</span> to view image info</p>
             <p><span className="bold">③</span>  Resize images by dragging the bottom right corner </p>
