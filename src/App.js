@@ -5,13 +5,60 @@ import FadingIcon from './components/FadingIcon.js';
 import './App.css';
 
 function App() {
-
   // State to store the pictures
   const [imageUrls, setImageUrls] = useState([]);
   const [color, setColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
-
   
+  // New states for loading and error handling
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const fetchTrends = async () => {
+    // Reset loading and error states
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://web-collage-backend.onrender.com/fetch-trends');
+      
+      // Handle non-200 responses
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const pictures = await response.json();
+      
+      // Validate data
+      if (!pictures || pictures.length === 0) {
+        throw new Error('No trends data received');
+      }
+
+      setImageUrls(pictures);
+      setIsLoading(false);
+      // Reset retry count on successful fetch
+      setRetryCount(0);
+    } catch (error) {
+      console.error('Error fetching trends:', error);
+      setError(error.message);
+      setIsLoading(false);
+
+      // Implement exponential backoff for retries
+      if (retryCount < 3) {
+        const timeout = Math.pow(2, retryCount) * 1000; // Exponential backoff
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchTrends();
+        }, timeout);
+      }
+    }
+  };
+
+  // UseEffect to handle the fetch operation
+  useEffect(() => {
+    fetchTrends();
+  }, []); // Empty dependency array means this runs once on component mount
 
   const handleColorChange = (event) => {
     const selectedColor = event.target.value;
@@ -23,49 +70,67 @@ function App() {
   };
 
   const getAccessibleTextColor = (hexColor) => {
-    // Convert hex to RGB
+    // Your existing color calculation logic
     const r = parseInt(hexColor.slice(1, 3), 16) / 255;
     const g = parseInt(hexColor.slice(3, 5), 16) / 255;
     const b = parseInt(hexColor.slice(5, 7), 16) / 255;
 
-    // Apply gamma correction
     const [rLin, gLin, bLin] = [r, g, b].map((c) =>
         c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
     );
 
-    // Calculate relative luminance
     const luminance = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
 
-    // Return white for dark backgrounds and black for light backgrounds
     return luminance > 0.179 ? "#000000" : "#ffffff";
-};
+  };
 
+  // Render loading or error states
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="image-generator-container">
+        <div className="loading-container" style={{ color: textColor }}>
+          <p>Loading...</p>
+          <FadingIcon />
+        </div>
+        </div>
+      );
+    }
 
-  // UseEffect to handle the fetch operation
-  useEffect(() => {
-    fetch('https://web-collage-backend.onrender.com/fetch-trends')
-      .then(response => response.json())
-      .then(pictures => {
-        // Update the state with the fetched pictures
-        setImageUrls(pictures);
-      })
-      .catch(error => {
-        console.error('Error fetching trends:', error);
-      });
-  }, []); // Empty dependency array means this runs once on component mount
+    if (error) {
+      return (
+        <div className="error-container" style={{ color: textColor }}>
+          <p>Unable to fetch images. {error}</p>
+          <button 
+            onClick={fetchTrends} 
+            style={{ 
+              backgroundColor: textColor, 
+              color: color, 
+              border: 'none', 
+              padding: '10px', 
+              cursor: 'pointer' 
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="image-generator-container">
+        <FadingIcon />
+        <ImageGenerator imageData={imageUrls} borderColor={textColor}/>
+      </div>
+    );
+  };
 
   return (
     <div className="app-container" style={{ background: color, color: textColor}} >
-      <div className="image-generator-container">
-        <FadingIcon></FadingIcon>
-        <ImageGenerator imageData={imageUrls} borderColor={textColor}/>
-      </div>
+      {renderContent()}
+      
       <div className="content-section">
-
-
-
         <hr style={{borderColor: textColor}}></hr>
-
 
         <div className="grid-container">
           <div style={{ lineHeight: "1.25" }}>
@@ -73,37 +138,23 @@ function App() {
             <p style={{ lineHeight: "1.25" }}><span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp; </span>   Hold <span className="key-input"style={{border: `1.75px solid ${textColor}` }} >Shift</span> to view image details.</p>
             <p><span className="bold">⁕&nbsp;&nbsp; </span>   Expand an image by dragging its bottom-right corner.</p>
             <p><span className="bold">⁕&nbsp;&nbsp; </span>   Right-click on an image to remove it.</p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing the page will clear all content. </p></div>
-          {/* <p><span className="bold">①</span>  Generate images using <span className="key-input">a</span> - <span className="key-input">z</span></p>
-            <p><span className="bold">②</span>  Hold <span className="key-input">Shift</span> to view image info</p>
-            <p><span className="bold">③</span>  Resize images by dragging the bottom right corner </p>
-            <p><span className="bold">④</span>  Right click on images to remove them </p>
-            <p><span className="bold">⑤</span>  Refreshing will clear the page </p></div> */}
-          {/* <div><h2>⚙️ Settings</h2><p>Show Date</p>
-            <p>Light/Dark Mode</p>
-            <p>Images</p>
-            <p>Text</p></div> */}
+            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing the page will clear all content. </p>
+          </div>
+          <div></div>
           <div>
-            
+            <p>Background Color:&nbsp;    
+              <input
+                type="color"
+                value={color}
+                onChange={handleColorChange}
+                style={{ cursor: "pointer" }}
+              />
+            </p>
+          </div>
         </div>
-        <div><p>Background Color:&nbsp;    <input
-              type="color"
-              value={color}
-              onChange={handleColorChange}
-              style={{ cursor: "pointer" }}
-            /></p></div>
-        </div>
-
-
-
-
-
-
-        {/* Your additional content goes here */}
       </div>
     </div>
   );
-
 }
 
 export default App;
