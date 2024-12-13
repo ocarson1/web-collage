@@ -2,16 +2,13 @@ import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import './ImageGenerator.css';
 
-const ImageGenerator = ({ imageData, borderColor }) => {
+
+const ImageGenerator = ({ imageData, borderColor}) => {
   const [images, setImages] = useState([]);
   const [draggedImage, setDraggedImage] = useState(null);
   const [resizingImage, setResizingImage] = useState(null);
   const [maxZIndex, setMaxZIndex] = useState(1);
   const [shiftPressed, setShiftPressed] = useState(false);
-
-
-
-
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {

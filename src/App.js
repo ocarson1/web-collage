@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ImageGenerator from './ImageGenerator.js';
 import FadingIcon from './components/FadingIcon.js';
+import { Analytics } from "@vercel/analytics/react"
+
 
 import './App.css';
 
@@ -9,7 +11,8 @@ function App() {
   const [imageUrls, setImageUrls] = useState([]);
   const [color, setColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
-  
+  // const [showTimestamp, setShowTimestamp] = useState(false);
+
   // New states for loading and error handling
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -90,7 +93,7 @@ function App() {
       return (
         <div className="image-generator-container">
         <div className="loading-container" style={{ color: textColor }}>
-          <p>Loading...</p>
+          <p>&nbsp;&nbsp;Loading...</p>
           <FadingIcon />
         </div>
         </div>
@@ -150,10 +153,20 @@ function App() {
                 style={{ cursor: "pointer" }}
               />
             </p>
+            <label>
+          {/* <input 
+            type="checkbox" 
+            checked={showTimestamp}
+            onChange={(e) => setShowTimestamp(e.target.checked)}
+          />
+          Show Timestamp */}
+        </label>
           </div>
         </div>
       </div>
+      <Analytics/>
     </div>
+    
   );
 }
 
