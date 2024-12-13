@@ -129,7 +129,9 @@ function App() {
   };
 
   return (
+    
     <div className="app-container" style={{ background: color, color: textColor}} >
+      <Analytics/>
       {renderContent()}
       
       <div className="content-section">
