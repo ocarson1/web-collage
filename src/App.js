@@ -3,7 +3,6 @@ import ImageGenerator from './ImageGenerator.js';
 import FadingIcon from './components/FadingIcon.js';
 import { Analytics } from "@vercel/analytics/react"
 
-
 import './App.css';
 
 function App() {
