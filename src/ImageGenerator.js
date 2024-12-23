@@ -32,30 +32,58 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     };
   }, []);
 
-
-
-
-
-
-
-
-
-  const getRandomPosition = () => {
+  const getRandomPosition = (x, y) => {
     const container = document.querySelector('.image-generator-container');
     if (!container) return { x: 0, y: 0 }; // Fallback if container not found
     
+    if (x !== undefined && y !== undefined) {
+      const { left, top } = container.getBoundingClientRect();
+      return {
+        x: x - left,
+        y: y - top
+      };
+    }
+    
     const { width, height } = container.getBoundingClientRect();
     return {
-      x: Math.random() * (width - 100), // Adjust to container's width
-      y: Math.random() * (height - 100) // Adjust to container's height
+      x: Math.random() * (width - 100),
+      y: Math.random() * (height - 100)
     };
   };
 
+  const createNewImage = (position) => {
+    // Get a random image from imageData
+    const randomIndex = Math.floor(Math.random() * imageData.length);
+    const randomImage = imageData[randomIndex];
 
+    if (randomImage) {
+      const newMaxZIndex = maxZIndex + 1;
+      setMaxZIndex(newMaxZIndex);
 
+      const newImage = {
+        id: Date.now(),
+        position: position,
+        src: randomImage.newsItemPicture,
+        parentTitle: randomImage.parentTitle,
+        newsItemUrl: randomImage.newsItemUrl,
+        width: 200,
+        height: 200,
+        zIndex: newMaxZIndex,
+        triggerKey: randomImage.key
+      };
 
+      setImages(prev => [...prev, newImage]);
+    }
+  };
 
-
+  // Handle touch for creating new images
+  const handleTouch = (e) => {
+    if (e.target.classList.contains('draggable-image')) return;
+    
+    const touch = e.touches[0];
+    const position = getRandomPosition(touch.clientX - 100, touch.clientY - 100);
+    createNewImage(position);
+  };
 
   // Handle key press to generate new image
   const handleKeyPress = useCallback((event) => {
@@ -70,16 +98,15 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     const key = event.key;
     const index = validKeys.indexOf(key);
 
-
     // Check if we have an image for this key
     if (index !== -1 && imageData[index]) {
-      // Increment max z-index for the new image
+      const position = getRandomPosition();
       const newMaxZIndex = maxZIndex + 1;
       setMaxZIndex(newMaxZIndex);
 
       const newImage = {
         id: Date.now(),
-        position: getRandomPosition(),
+        position: position,
         src: imageData[index].newsItemPicture,
         parentTitle: imageData[index].parentTitle,
         newsItemUrl: imageData[index].newsItemUrl,
@@ -116,7 +143,6 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     const containerRect = container.getBoundingClientRect();
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-  
     const boundingRect = e.target.getBoundingClientRect();
 
     console.log('Drag Start Debugging:', {
@@ -220,12 +246,19 @@ const ImageGenerator = ({ imageData, borderColor}) => {
 
   // Add event listeners
   React.useEffect(() => {
+    const container = document.querySelector('.image-generator-container');
+    if (container) {
+      container.addEventListener('touchstart', handleTouch);
+    }
+
     window.addEventListener('keypress', handleKeyPress);
     window.addEventListener('mousemove', handleDrag);
     window.addEventListener('mouseup', handleDragEnd);
 
-    // Cleanup event listeners
     return () => {
+      if (container) {
+        container.removeEventListener('touchstart', handleTouch);
+      }
       window.removeEventListener('keypress', handleKeyPress);
       window.removeEventListener('mousemove', handleDrag);
       window.removeEventListener('mouseup', handleDragEnd);
@@ -338,12 +371,13 @@ const ImageGenerator = ({ imageData, borderColor}) => {
 ImageGenerator.propTypes = {
   imageData: PropTypes.arrayOf(
     PropTypes.shape({
-      parentTitle: PropTypes.string.isRequired,
       newsItemPicture: PropTypes.string.isRequired,
-      newsItemUrl: PropTypes.string.isRequired
+      parentTitle: PropTypes.string.isRequired,
+      newsItemUrl: PropTypes.string.isRequired,
+      key: PropTypes.string
     })
   ).isRequired,
-  borderColor: PropTypes.string // Add this line
+  borderColor: PropTypes.string
 };
 
 export default ImageGenerator;
