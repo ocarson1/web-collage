@@ -62,3 +62,18 @@ body {
   margin-left: 2vw;
   margin-top: 2vw;
 }
+
+.submit-container {
+
+  border: 2px dashed #333;  /* You can adjust thickness and color */
+  border-radius: 8px;       /* Adjust the pixel value to make corners more or less curved */
+  padding: 20px;  
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+}
+
+button {
+  font-size: 16px
+}

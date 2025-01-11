@@ -27,6 +27,23 @@ function App() {
   //Gallery functionality
   const [galImages, setGalImages] = useState([]);
 
+  const [date, setDate] = useState(new Date())
+
+const [formData, setFormData] = useState({
+  image: null,
+  title: '',
+  description: ''
+
+})
+
+const handleChange = (e) => {
+  const {name, value} = e.target;
+  setFormData(prevData => ({
+    ...prevData,
+    [name]: value
+  }))
+}
+
   const fetchGallery = async () => {
     setIsLoading(true);
     setError(null);
@@ -139,6 +156,12 @@ function App() {
       return;
     }
 
+    if ( !formData.description.trim()) {
+      // You could show an error message to the user here
+      console.error("Title and description are required!");
+      return;
+  }
+
     domtoimage
     .toBlob(node, {
 
@@ -149,17 +172,28 @@ function App() {
     )
     .then(async (blob) => {  // Note the async here
       // Save the Blob as a file
+
+      setFormData(prevData => ({
+        ...prevData,
+        image: blob, 
+      }))
+
+      const formDataToSubmit = new FormData();
+      formDataToSubmit.append('image', blob, 'captured-content.png');
+      formDataToSubmit.append('title', date.toLocaleString());
+      formDataToSubmit.append('description', 'Submitted from ' + formData.description);
   
-      const formData = new FormData();
-      formData.append('image', blob, 'captured-content.png'); // Added filename
-      formData.append('title', "Image");
-      formData.append('description', "Description");
+      console.log('form data', formData)
+      // const formData = new FormData();
+      // formData.append('image', blob, 'captured-content.png'); // Added filename
+      // formData.append('title', "Image");
+      // formData.append('description', "Description");
   
       try {
         // Await the fetch
         const response = await fetch('https://web-collage-backend.onrender.com/upload', {
           method: 'POST',
-          body: formData,
+          body: formDataToSubmit,
         });
   
         if (!response.ok) {
@@ -192,6 +226,7 @@ function App() {
 
    // UseEffect to handle the fetch operation
    useEffect(() => {
+    setDate(new Date())
     fetchTrends();
     fetchGallery();
       const initialColor = `#f0f0f0`; // e.g., '#ffffff' or 'blue'
@@ -280,18 +315,31 @@ function App() {
             <p><span className="bold">⁕&nbsp;&nbsp; </span>   Right-click on an image to remove it.</p>
             <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing the page will clear all content. </p>
           </div>
-          <div></div>
-          <div>
-            <p>Background Color:&nbsp;
+          <div
+          >
+  <p>Background Color:&nbsp;
               <input
                 type="color"
                 value={color}
                 onChange={handleColorChange}
                 style={{ cursor: "pointer" }}
               />
-            </p>
-            <button onClick={handleCaptureAndSave}>Submit to Live Gallery</button>
-            <button onClick={handleDownload}>Download</button>
+            </p></div>
+          <div>
+            
+              <p>{date.toLocaleString()}</p>
+              <p>Submitted from&nbsp;
+                  <input
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder=""
+                  /></p>
+            <div><button onClick={handleCaptureAndSave}>Upload to Gallery</button></div>
+            <br></br>
+            <div><button onClick={handleDownload}>Download to device</button></div>
+
 
             <label>
               {/* <input 

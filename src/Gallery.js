@@ -25,7 +25,6 @@ const Gallery = ({ images }) => {
                     <div className="caption">
                         <h3>{image.metadata.title}</h3>
                         <p>{image.metadata.description}</p>
-                        <small>{new Date(image.metadata.uploadDate).toLocaleDateString()}</small>
                     </div>
                 </div>
             ))}

@@ -87,6 +87,14 @@ const ImageGenerator = ({ imageData, borderColor}) => {
 
   // Handle key press to generate new image
   const handleKeyPress = useCallback((event) => {
+
+    const activeElement = document.activeElement;
+    const isInput = activeElement.tagName === 'INPUT' || 
+                    activeElement.tagName === 'TEXTAREA';
+
+    if (isInput) {
+        return;
+    }
     // Define the keys that can trigger image generation
     const validKeys = [
       ...Array.from({length: 26}, (_, i) => String.fromCharCode(97 + i)), // a-z
