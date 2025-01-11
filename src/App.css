@@ -28,45 +28,14 @@ body {
   height: 100vh; /* or set a specific height */
   overflow: hidden; /* Change from 'auto' to 'hidden' */
 }
-/* 
-.p {
-  font-family: Arial, Helvetica, sans-serif;
-} */
-/* 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+.image-generator-section {
+  position: static;
+  width: 100%;
+  height: 100vh; /* or set a specific height */
+  overflow:hidden; /* Change from 'auto' to 'hidden' */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-} */
 
 .app-container {
   height: 100vh; /* Full viewport height */
@@ -75,7 +44,8 @@ body {
 
 .content-section {
   min-height: 20vh; /* Full viewport height for content */
-  padding: 2vw;
+  padding-left: 2vw;
+  padding-right: 2vw;
 }
 
 .grid-container {

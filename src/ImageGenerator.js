@@ -380,4 +380,6 @@ ImageGenerator.propTypes = {
   borderColor: PropTypes.string
 };
 
+
+
 export default ImageGenerator;
