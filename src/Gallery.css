@@ -34,6 +34,7 @@
     width: 100%;
     height: auto;
     display: block;
+    max-height: 250px;
   }
   
   .caption {
@@ -55,3 +56,21 @@
     font-size: 12px;
     opacity: 0.5;
   }
+
+  @media (max-width: 1200px) {
+    .gallery-grid {
+        grid-template-columns: 1fr 1fr 1fr; /* 3 columns for medium viewports */
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: 1fr 1fr; /* 2 columns for small viewports */
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-grid {
+        grid-template-columns: 1fr; /* 1 column for very small viewports */
+    }
+}
