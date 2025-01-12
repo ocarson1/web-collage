@@ -54,6 +54,15 @@ body {
   gap: 10px; /* Adds space between columns */
 }
 
+
+@media (max-width: 768px) {
+  .grid-container {
+      display: flex; /* Switch to flex layout */
+      flex-direction: column-reverse; /* Reverse the order of items */
+      gap: 20px; /* Adjust the gap for the new layout */
+  }
+}
+
 .grid-container.footer {
   text-align: right;
 }
