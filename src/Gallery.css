@@ -35,7 +35,10 @@
     height: auto;
     display: block;
     max-height: 250px;
+    object-fit: scale-down; /* Fills the container while maintaining aspect ratio */
+    
   }
+  
   
   .caption {
     padding: 8px;
