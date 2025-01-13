@@ -3,6 +3,7 @@ import ImageGenerator from './ImageGenerator.js';
 import FadingIcon from './components/FadingIcon.js';
 import { Analytics } from "@vercel/analytics/react";
 import Gallery from './Gallery.js';
+import Instructions from './Instructions.js'
 
 import './App.css';
 import domtoimage from 'dom-to-image'
@@ -309,11 +310,7 @@ const handleChange = (e) => {
 
         <div className="grid-container">
           <div style={{ lineHeight: "1.25" }}>
-            <p style={{ lineHeight: "1.25" }}><span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>   Generate images using keyboard input <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>a</span> → <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>z</span>.</p>
-            <p style={{ lineHeight: "1.25" }}><span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp; </span>   Hold <span className="key-input" style={{ border: `1.75px solid ${textColor}` }} >Shift</span> to view image details.</p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Expand an image by dragging its bottom-right corner.</p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Right-click on an image to remove it.</p>
-            <p><span className="bold">⁕&nbsp;&nbsp; </span>   Refreshing the page will clear all content. </p>
+            <Instructions color={textColor}/>
           </div>
           <div
           >
@@ -322,7 +319,10 @@ const handleChange = (e) => {
                 type="color"
                 value={color}
                 onChange={handleColorChange}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer",
+                  verticalAlign: "text-top"  /* or try "baseline", "text-bottom", etc. */
+
+                 }}
               />
             </p></div>
           <div>

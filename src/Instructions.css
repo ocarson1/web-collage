@@ -1,0 +1,33 @@
+.instructions-container {
+    max-width: 42rem;
+    min-height: 275px;
+  }
+  
+  .tabs-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+  }
+  
+  .tab-button {
+    margin-block-start: 1em;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .tab-button:hover {
+    color: #666;
+  }
+  
+  .tab-button.active {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
