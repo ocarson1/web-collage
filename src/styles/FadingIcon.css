@@ -1,7 +1,7 @@
 .fading-icon {
   position: absolute;
-  top: 90%;
-  left: 96%;
+  right: 2vw;
+ bottom: 1vw;
   transform: translate(-50%, -50%);
   transition: opacity 1s ease-in-out;
   z-index: 1000; /* Ensures icon appears above other content */
