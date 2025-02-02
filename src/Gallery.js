@@ -21,7 +21,9 @@ const Gallery = ({ images }) => {
         <div className="gallery-grid">
             {images.slice().reverse().map((image, index) => (
                 <div className="grid-item" key={index}>
+                    <div className="gal-image-wrapper">
                     <img src={image.imageUrl} alt={image.metadata.title} />
+                    </div>
                     <div className="caption">
                         <h3>{image.metadata.title}</h3>
                         <p>{image.metadata.description}</p>

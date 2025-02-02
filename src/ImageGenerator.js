@@ -36,30 +36,34 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     const container = document.querySelector('.image-generator-container');
     if (!container) return { x: 0, y: 0 }; // Fallback if container not found
     
+    const { left, top, width, height } = container.getBoundingClientRect();
+    
     if (x !== undefined && y !== undefined) {
-      const { left, top } = container.getBoundingClientRect();
+      // Calculate position relative to container, accounting for scroll
+      const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      
       return {
-        x: x - left,
-        y: y - top
+        x: Math.max(0, Math.min(x - left + scrollX, width - 100)),
+        y: Math.max(0, Math.min(y - top + scrollY, height - 100))
       };
     }
     
-    const { width, height } = container.getBoundingClientRect();
+    // For random positioning
     return {
-      x: Math.random() * (width - 100),
-      y: Math.random() * (height - 100)
+      x: Math.max(0, Math.min(Math.random() * width, width - 100)),
+      y: Math.max(0, Math.min(Math.random() * height, height - 100))
     };
   };
-
+  
   const createNewImage = (position) => {
-    // Get a random image from imageData
     const randomIndex = Math.floor(Math.random() * imageData.length);
     const randomImage = imageData[randomIndex];
-
+  
     if (randomImage) {
       const newMaxZIndex = maxZIndex + 1;
       setMaxZIndex(newMaxZIndex);
-
+  
       const newImage = {
         id: Date.now(),
         position: position,
@@ -71,17 +75,20 @@ const ImageGenerator = ({ imageData, borderColor}) => {
         zIndex: newMaxZIndex,
         triggerKey: randomImage.key
       };
-
+  
       setImages(prev => [...prev, newImage]);
     }
   };
-
-  // Handle touch for creating new images
+  
   const handleTouch = (e) => {
     if (e.target.classList.contains('draggable-image')) return;
     
     const touch = e.touches[0];
-    const position = getRandomPosition(touch.clientX - 100, touch.clientY - 100);
+    // Get the touch position relative to the viewport
+    const position = getRandomPosition(
+      touch.clientX,
+      touch.clientY
+    );
     createNewImage(position);
   };
 
@@ -133,33 +140,29 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     e.preventDefault();
   };
 
-  // Start dragging an image
   const handleDragStart = (e, imageId) => {
-
-    console.log(e.target.classList)
-
     if (e.shiftKey) return;
-
     if (e.target.classList.contains('draggable-image')) {
-      console.log("resize handle clicked")
+      console.log("resize handle clicked");
       return;
     }
-    console.log("drag starting")
-
-    
+    console.log("drag starting");
+  
     const container = document.querySelector('.image-generator-container');
     const containerRect = container.getBoundingClientRect();
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
     const boundingRect = e.target.getBoundingClientRect();
-
+    
+    // Calculate the initial offset from the mouse to the top-left corner of the image
+    const offsetX = e.clientX - boundingRect.left;
+    const offsetY = e.clientY - boundingRect.top;
+  
     console.log('Drag Start Debugging:', {
       containerRect,
-      scrollTop,
-      scrollLeft,
       boundingRect,
       clientX: e.clientX,
-      clientY: e.clientY
+      clientY: e.clientY,
+      offsetX,
+      offsetY
     });
     
     const newMaxZIndex = maxZIndex + 1;
@@ -175,41 +178,38 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     
     setDraggedImage({
       id: imageId,
-      offsetX: e.clientX - boundingRect.left + scrollLeft - containerRect.left,
-      offsetY: e.clientY - boundingRect.top - scrollTop - containerRect.top
+      offsetX,
+      offsetY
     });
   };
-
-  // Handle image dragging
+  
   const handleDrag = useCallback((e) => {
     if (draggedImage) {
       const container = document.querySelector('.image-generator-container');
       if (!container) return;
   
       const containerRect = container.getBoundingClientRect();
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+      
+      // Calculate new position relative to container without boundaries
+      const newX = e.clientX - containerRect.left - draggedImage.offsetX;
+      const newY = e.clientY - containerRect.top - draggedImage.offsetY;
   
       setImages(prev =>
         prev.map(img =>
           img.id === draggedImage.id
             ? {
                 ...img,
-                position: {
-                  x: e.clientX - containerRect.left - scrollLeft - draggedImage.offsetX,
-                  y: e.clientY - draggedImage.offsetY + scrollTop
-                }
+                position: { x: newX, y: newY }
               }
             : img
         )
       );
     }
-
+  
     if (resizingImage) {
       setImages(prev =>
         prev.map(img => {
           if (img.id === resizingImage.id) {
-            // Calculate new width and height
             const newWidth = Math.max(50, resizingImage.startWidth + (e.clientX - resizingImage.startX));
             const newHeight = Math.max(50, resizingImage.startHeight + (e.clientY - resizingImage.startY));
   
@@ -224,7 +224,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
       );
     }
   }, [draggedImage, resizingImage]);
-
+  
   const handleDragEnd = useCallback(() => {
     setDraggedImage(null);
     setResizingImage(null);

@@ -90,6 +90,7 @@ const handleChange = (e) => {
 
     try {
       const response = await fetch('https://web-collage-backend.onrender.com/fetch-trends');
+      //const response = await fetch('http://localhost:3000/fetch-trends');
 
       // Handle non-200 responses
       if (!response.ok) {
@@ -292,9 +293,10 @@ const handleChange = (e) => {
     }
 
     return (
-      <div className="image-generator-section"  ref={captureRef}>
+      <div className="image-generator-section">
         <FadingIcon />
-        <ImageGenerator imageData={imageUrls} borderColor={textColor} />
+        <div className="image-generator-wrapper" ref = {captureRef}> 
+        <ImageGenerator imageData={imageUrls} borderColor={textColor} /></div>
       </div>
     );
   };
@@ -303,7 +305,10 @@ const handleChange = (e) => {
 
     <div className="app-container" style={{ background: color, color: textColor }} >
       <Analytics />
+      <div className="top-wrapper">
+      <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
       {renderContent()}
+      </div>
 
       <div className="content-section" >
         <hr style={{ borderColor: textColor }}></hr>

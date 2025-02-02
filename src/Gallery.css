@@ -7,6 +7,8 @@
     display:block;
 }
 
+
+
 .gallery-container {
     margin-top: 22.5px;
 }
@@ -21,22 +23,29 @@
   }
   
   .grid-item {
+    display: flex;
+    flex-direction: column;
     max-width: 75%;
     align-self: center;
     justify-self: center;
-
-    overflow: hidden;
     text-align: left;
-
+    /* Add these to center the inner wrapper */
+    display: flex;
+    justify-content: center;
   }
   
-  .grid-item img {
-    width: 100%;
-    height: auto;
-    display: block;
+  /* Create a wrapper div around your img */
+  .gal-image-wrapper {
+    display: inline-block; /* This makes it shrink to fit the image */
+    line-height: 0; /* Removes any extra space */
+  }
+  
+  .gal-image-wrapper img {
+    border: 1px solid; /* Simplified border syntax */
     max-height: 250px;
-    object-fit: scale-down; /* Fills the container while maintaining aspect ratio */
-    
+    width: auto; /* Change from 100% to auto */
+    max-width: 100%; /* Ensure it doesn't overflow container */
+    object-fit: scale-down;
   }
   
   

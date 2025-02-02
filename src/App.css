@@ -4,12 +4,31 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  font-size: 18px
+  font-size: 1em
   
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+}
+
+
+h1 {
+  font-size: 1.5em;
+  position: relative;
+  padding: 2vw
 }
 
 .bold {
   font-weight: bold;
+}
+
+hr {
+  height: 1px;
+  background-color: black;
+  border: none;
 }
 
 .key-input {
@@ -22,17 +41,39 @@ body {
   display: inline-block; /* Ensure it fits snugly around the text */
 }
 
+.top-wrapper {
+  position: relative;
+  height: 100vh;
+
+}
+
+.image-generator-wrapper {
+  width: 100%;
+  height: 100%;
+
+}
+
 .image-generator-container {
+
+
+  border-color: #333;
   position: relative;
   width: 100%;
-  height: 100vh; /* or set a specific height */
+  height: 100%; /* or set a specific height */
   overflow: hidden; /* Change from 'auto' to 'hidden' */
 }
 
 .image-generator-section {
-  position: static;
-  width: 100%;
-  height: 100vh; /* or set a specific height */
+
+  margin: 0vw 2vw;
+
+  border-style: solid;
+  border-width: 1px;
+
+  border-color: #333;
+
+  position: relative;
+  height: 80vh; /* or set a specific height */
   overflow:hidden; /* Change from 'auto' to 'hidden' */
 }
 
