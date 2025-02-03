@@ -9,13 +9,15 @@ const ImageGenerator = ({ imageData, borderColor}) => {
   const [resizingImage, setResizingImage] = useState(null);
   const [maxZIndex, setMaxZIndex] = useState(1);
   const [shiftPressed, setShiftPressed] = useState(false);
-
+ 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.shiftKey) {
         setShiftPressed(true);
       }
     };
+
+
 
     const handleKeyUp = (e) => {
       if (!e.shiftKey) {

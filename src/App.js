@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ImageGenerator from './ImageGenerator.js';
-import FadingIcon from './components/FadingIcon.js';
 import { Analytics } from "@vercel/analytics/react";
 import Gallery from './Gallery.js';
 import Instructions from './Instructions.js'
@@ -33,7 +32,7 @@ function App() {
 const [formData, setFormData] = useState({
   image: null,
   title: '',
-  description: ''
+  description: 'somewhere'
 
 })
 
@@ -158,11 +157,14 @@ const handleChange = (e) => {
       return;
     }
 
-    if ( !formData.description.trim()) {
-      // You could show an error message to the user here
-      console.error("Title and description are required!");
-      return;
-  }
+  //   if ( !formData.description.trim()) {
+  //     // You could show an error message to the user here
+  //     console.error("Title and description are required!");
+  //     setFormData(prevData => ({
+  //       ...prevData,
+  //       description: "somewhere", 
+  //     }))
+  // }
 
     domtoimage
     .toBlob(node, {
@@ -266,7 +268,6 @@ const handleChange = (e) => {
         <div className="image-generator-section">
           <div className="loading-container" style={{ color: textColor }}>
             <p>&nbsp;&nbsp;Loading...</p>
-            <FadingIcon />
           </div>
         </div>
       );
@@ -294,7 +295,6 @@ const handleChange = (e) => {
 
     return (
       <div className="image-generator-section">
-        <FadingIcon />
         <div className="image-generator-wrapper" ref = {captureRef}> 
         <ImageGenerator imageData={imageUrls} borderColor={textColor} /></div>
       </div>
@@ -339,7 +339,6 @@ const handleChange = (e) => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder=""
                   /></p>
             <div><button onClick={handleCaptureAndSave}>Upload to Gallery</button></div>
             <br></br>

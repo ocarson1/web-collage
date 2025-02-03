@@ -86,3 +86,86 @@
         grid-template-columns: 1fr; /* 1 column for very small viewports */
     }
 }
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  position: relative;
+  max-width: 64rem; /* equivalent to max-w-4xl */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-image {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.close-button:hover {
+  color: #d1d5db; /* light gray on hover */
+}
+
+.nav-button {
+  position: absolute;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.nav-button:hover {
+  color: #d1d5db;
+}
+
+.nav-button-left {
+  left: -5rem;
+}
+
+.nav-button-right {
+  right: -5rem;
+}
+
+/* Add some basic animation for the modal */
+.modal-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
