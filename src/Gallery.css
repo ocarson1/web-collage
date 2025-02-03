@@ -38,6 +38,7 @@
   .gal-image-wrapper {
     display: inline-block; /* This makes it shrink to fit the image */
     line-height: 0; /* Removes any extra space */
+    align-self: center;
   }
   
   .gal-image-wrapper img {
@@ -50,7 +51,7 @@
   
   
   .caption {
-    padding: 8px;
+    padding: 8px 0px;
   }
   
   .caption h3 {
