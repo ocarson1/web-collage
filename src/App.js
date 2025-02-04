@@ -367,8 +367,7 @@ const handleChange = (e) => {
       {isMobile && (
         <div>
         <p style={{ padding: "20px" }}>
-          WEB COLLAGE <br></br><br></br><br></br>
-          Create collages on desktop using trending Google searches and submit them to our open gallery.
+          Create collages on desktop using trending Google searches and submit them to this live gallery!
         </p>
         </div>
       )}
