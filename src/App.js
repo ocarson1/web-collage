@@ -365,9 +365,12 @@ const handleChange = (e) => {
   
       {/* Mobile-only message */}
       {isMobile && (
-        <p style={{ textAlign: "center", padding: "10px" }}>
-          This experience is best viewed on a desktop.
+        <div>
+        <p style={{ padding: "20px" }}>
+          WEB COLLAGE <br></br><br></br><br></br>
+          Create collages on desktop using trending Google searches and submit them to our open gallery.
         </p>
+        </div>
       )}
   
       {/* Gallery always appears */}

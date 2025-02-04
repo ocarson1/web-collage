@@ -1,12 +1,5 @@
 
 
-.gallery-section {
-    position: relative;
-    padding-left: 2vw;
-    padding-right: 2vw;
-    display:block;
-}
-
 
 
 .gallery-container {
@@ -74,6 +67,14 @@
     .gallery-grid {
         grid-template-columns: 1fr 1fr 1fr; /* 3 columns for medium viewports */
     }
+
+    .gallery-section {
+      position: relative;
+      padding-left: 2vw;
+      padding-right: 2vw;
+      display:block;
+  }
+  
 }
 
 @media (max-width: 768px) {
@@ -86,6 +87,13 @@
     .gallery-grid {
         grid-template-columns: 1fr; /* 1 column for very small viewports */
     }
+
+    .gallery-section {
+
+      padding-left: 20px;
+      padding-right: 20px;
+
+  }
 }
 
 
