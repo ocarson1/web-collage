@@ -1,6 +1,12 @@
 
 
+.gallery-section {
+  position: relative;
+  padding-left: 2vw;
+  padding-right: 2vw;
+  display:block;
 
+}
 
 .gallery-container {
     margin-top: 22.5px;
