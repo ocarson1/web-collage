@@ -7,6 +7,8 @@ import Instructions from './Instructions.js'
 import './App.css';
 import domtoimage from 'dom-to-image'
 import { saveAs } from "file-saver";
+import { isMobile } from "react-device-detect";
+
 
 
 
@@ -272,7 +274,7 @@ const handleChange = (e) => {
         </div>
       );
     }
-
+  
     if (error) {
       return (
         <div className="error-container" style={{ color: textColor }}>
@@ -282,9 +284,9 @@ const handleChange = (e) => {
             style={{
               backgroundColor: textColor,
               color: color,
-              border: 'none',
-              padding: '10px',
-              cursor: 'pointer'
+              border: "none",
+              padding: "10px",
+              cursor: "pointer",
             }}
           >
             Retry
@@ -292,78 +294,85 @@ const handleChange = (e) => {
         </div>
       );
     }
-
+  
     return (
       <div className="image-generator-section">
-        <div className="image-generator-wrapper" ref = {captureRef}> 
-        <ImageGenerator imageData={imageUrls} borderColor={textColor} /></div>
+        <div className="image-generator-wrapper" ref={captureRef}>
+          <ImageGenerator imageData={imageUrls} borderColor={textColor} />
+        </div>
       </div>
     );
   };
-
+  
   return (
-
-    <div className="app-container" style={{ background: color, color: textColor }} >
+    <div className="app-container" style={{ background: color, color: textColor }}>
       <Analytics />
-      <div className="top-wrapper">
-      <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
-      {renderContent()}
-      </div>
-
-      <div className="content-section" >
-        <hr style={{ borderColor: textColor }}></hr>
-
-        <div className="grid-container">
-          <div style={{ lineHeight: "1.25" }}>
-            <Instructions color={textColor}/>
+  
+      {/* Desktop-only content */}
+      {!isMobile && (
+        <>
+          <div className="top-wrapper">
+            <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
+            {renderContent()}
           </div>
-          <div
-          >
-  <p>Background Color:&nbsp;
-              <input
-                type="color"
-                value={color}
-                onChange={handleColorChange}
-                style={{ cursor: "pointer",
-                  verticalAlign: "text-top"  /* or try "baseline", "text-bottom", etc. */
-
-                 }}
-              />
-            </p></div>
-          <div>
-            
-              <p>{date.toLocaleString()}</p>
-              <p>Submitted from&nbsp;
+  
+          <div className="content-section">
+            <hr style={{ borderColor: textColor }}></hr>
+  
+            <div className="grid-container">
+              <div style={{ lineHeight: "1.25" }}>
+                <Instructions color={textColor} />
+              </div>
+              <div>
+                <p>
+                  Background Color:&nbsp;
                   <input
-                  type="text"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  /></p>
-            <div><button onClick={handleCaptureAndSave}>Upload to Gallery</button></div>
-            <br></br>
-            <div><button onClick={handleDownload}>Download to device</button></div>
-
-
-            <label>
-              {/* <input 
-            type="checkbox" 
-            checked={showTimestamp}
-            onChange={(e) => setShowTimestamp(e.target.checked)}
-          />
-          Show Timestamp */}
-            </label>
+                    type="color"
+                    value={color}
+                    onChange={handleColorChange}
+                    style={{
+                      cursor: "pointer",
+                      verticalAlign: "text-top",
+                    }}
+                  />
+                </p>
+              </div>
+              <div>
+                <p>{date.toLocaleString()}</p>
+                <p>
+                  Submitted from&nbsp;
+                  <input
+                    type="text"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </p>
+                <div>
+                  <button onClick={handleCaptureAndSave}>Upload to Gallery</button>
+                </div>
+                <br></br>
+                <div>
+                  <button onClick={handleDownload}>Download to device</button>
+                </div>
+              </div>
+            </div>
+  
+            <hr style={{ borderColor: textColor }}></hr>
           </div>
-        </div>
-        <hr style={{ borderColor: textColor }}></hr>
-
-      </div>
-      <Gallery images={galImages}></Gallery>
-      
-
-
+        </>
+      )}
+  
+      {/* Mobile-only message */}
+      {isMobile && (
+        <p style={{ textAlign: "center", padding: "10px" }}>
+          This experience is best viewed on a desktop.
+        </p>
+      )}
+  
+      {/* Gallery always appears */}
+      <Gallery images={galImages} />
     </div>
-
   );
 }
 
