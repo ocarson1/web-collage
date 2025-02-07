@@ -186,7 +186,7 @@ const handleChange = (e) => {
 
       const formDataToSubmit = new FormData();
       formDataToSubmit.append('image', blob, 'captured-content.png');
-      formDataToSubmit.append('title', date.toLocaleString());
+      formDataToSubmit.append('title', formatDate1(date));
       formDataToSubmit.append('description', 'Submitted from ' + formData.description);
   
       console.log('form data', formData)
