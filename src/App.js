@@ -313,7 +313,7 @@ const handleChange = (e) => {
         <>
           <div className="top-wrapper">
             <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
-            <hr style={{ borderColor: textColor }}></hr>
+            {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}
           </div>
