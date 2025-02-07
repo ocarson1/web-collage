@@ -68,38 +68,40 @@ const Instructions = ({color}) => {
     </div>
   );
 
-  const MobileInstructions = () => (
-    <div style={{ lineHeight: "1.25" }}>
-      <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
-        Tap to generate a random trending search image.
-      </p>
-      {/* <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
-        Long press on an image to view its details.
-      </p>
-      <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
-        Pinch to resize images.
-      </p>
-      <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
-        Long press on an image to remove it.
-      </p> */}
-      <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
-        Refreshing the page will clear all content.
-      </p>
-    </div>
-  );
+  // const MobileInstructions = () => (
+  //   <div style={{ lineHeight: "1.25" }}>
+  //     <p>
+  //       <span className="bold">⁕&nbsp;&nbsp;</span>
+  //       Tap to generate a random trending search image.
+  //     </p>
+  //     {/* <p>
+  //       <span className="bold">⁕&nbsp;&nbsp;</span>
+  //       Long press on an image to view its details.
+  //     </p>
+  //     <p>
+  //       <span className="bold">⁕&nbsp;&nbsp;</span>
+  //       Pinch to resize images.
+  //     </p>
+  //     <p>
+  //       <span className="bold">⁕&nbsp;&nbsp;</span>
+  //       Long press on an image to remove it.
+  //     </p> */}
+  //     <p>
+  //       <span className="bold">⁕&nbsp;&nbsp;</span>
+  //       Refreshing the page will clear all content.
+  //     </p>
+  //   </div>
+  // );
 
   return (
     <div className="instructions-container">
       <div className="tabs-container">
-        <TabButton tab="Desktop (Recommended)" /> 
+        <DesktopInstructions></DesktopInstructions>
+        {/* <TabButton tab="Desktop (Recommended)" /> 
         <TabButton tab="Mobile" />
       </div>
-      {activeTab === "Desktop (Recommended)" ? <DesktopInstructions /> : <MobileInstructions />}
+      {activeTab === "Desktop (Recommended)" ? <DesktopInstructions /> : <MobileInstructions />} */}
+    </div>
     </div>
   );
 };

@@ -313,11 +313,12 @@ const handleChange = (e) => {
         <>
           <div className="top-wrapper">
             <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
+            <hr style={{ borderColor: textColor }}></hr>
+            <br></br>
             {renderContent()}
           </div>
   
           <div className="content-section">
-            <hr style={{ borderColor: textColor }}></hr>
   
             <div className="grid-container">
               <div style={{ lineHeight: "1.25" }}>
