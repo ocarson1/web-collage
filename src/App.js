@@ -220,6 +220,17 @@ const handleChange = (e) => {
     });
   };
 
+  function formatDate1(date) {
+    return date.toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).replace(',', '').replace(/\//g, '.');
+  }
+
  
   const handleColorChange = (event) => {
     const selectedColor = event.target.value;
@@ -312,7 +323,7 @@ const handleChange = (e) => {
       {!isMobile && (
         <>
           <div className="top-wrapper">
-            <h1>WEB COLLAGE / US / {date.toLocaleString()} </h1>
+            <h1>WEB COLLAGE / US / {formatDate1(date)} </h1>
             {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}
@@ -339,7 +350,6 @@ const handleChange = (e) => {
                 </p>
               </div>
               <div>
-                <p>{date.toLocaleString()}</p>
                 <p>
                   Submitted from&nbsp;
                   <input
@@ -350,7 +360,7 @@ const handleChange = (e) => {
                   />
                 </p>
                 <div>
-                  <button onClick={handleCaptureAndSave}>Upload to Gallery</button>
+                  <button onClick={handleCaptureAndSave}>Upload to public gallery</button>
                 </div>
                 <br></br>
                 <div>
