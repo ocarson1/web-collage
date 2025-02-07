@@ -378,7 +378,7 @@ const handleChange = (e) => {
       {isMobile && (
         <div>
         <p style={{ padding: "20px" }}>
-          Submit collages on desktop to this public gallery!
+          Desktop recommended
         </p>
         </div>
       )}
