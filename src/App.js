@@ -38,13 +38,13 @@ const [formData, setFormData] = useState({
 
 })
 
-const handleChange = (e) => {
-  const {name, value} = e.target;
-  setFormData(prevData => ({
-    ...prevData,
-    [name]: value
-  }))
-}
+// const handleChange = (e) => {
+//   const {name, value} = e.target;
+//   setFormData(prevData => ({
+//     ...prevData,
+//     [name]: value
+//   }))
+// }
 
   const fetchGallery = async () => {
     setIsLoading(true);
@@ -323,7 +323,7 @@ const handleChange = (e) => {
       {!isMobile && (
         <>
           <div className="top-wrapper">
-            <h1>WEB COLLAGE / US / {formatDate1(date)} </h1>
+            <h1>WC / US / {formatDate1(date)} </h1>
             {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}
@@ -337,7 +337,7 @@ const handleChange = (e) => {
               </div>
               <div>
                 <p>
-                  Background Color:&nbsp;
+                  Background Color:
                   <input
                     type="color"
                     value={color}
@@ -350,7 +350,7 @@ const handleChange = (e) => {
                 </p>
               </div>
               <div>
-                <p>
+                {/* <p>
                   Submitted from&nbsp;
                   <input
                     type="text"
@@ -358,13 +358,15 @@ const handleChange = (e) => {
                     value={formData.description}
                     onChange={handleChange}
                   />
-                </p>
+                </p> */}
+                <div className="buttons">
                 <div>
-                  <button onClick={handleCaptureAndSave}>Upload to public gallery</button>
+                  <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
                 </div>
                 <br></br>
                 <div>
-                  <button onClick={handleDownload}>Download to device</button>
+                  <button onClick={handleDownload}>Download</button>
+                </div>
                 </div>
               </div>
             </div>

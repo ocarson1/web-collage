@@ -28,6 +28,11 @@ hr {
   border: none;
 }
 
+input {
+  height: 3em;
+  margin-left:0.5em;
+}
+
 .key-input {
   background-color: rgba(255,255,255,0.2); 
 
@@ -94,13 +99,6 @@ hr {
 }
 
 
-@media (max-width: 768px) {
-  .grid-container {
-      display: flex; /* Switch to flex layout */
-      flex-direction: column-reverse; /* Reverse the order of items */
-      gap: 20px; /* Adjust the gap for the new layout */
-  }
-}
 
 .grid-container.footer {
   text-align: right;
@@ -123,5 +121,19 @@ hr {
 }
 
 button {
-  font-size: 16px
+  font-size: 16px;
+  width: 8em;
+  padding:0.5em
+}
+
+.buttons {
+  margin-top: 1em;
+  display: flex;
+  align-items: end;
+  justify-content: right;
+  flex-direction: column;
+}
+
+.button-submit {
+
 }

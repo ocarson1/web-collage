@@ -58,7 +58,7 @@ const reversedImages = [...images].reverse();
                     </div>
                     <div className="caption">
                         <h3>{image.metadata.title}</h3>
-                        <p>{image.metadata.description}</p>
+                        {/* <p>{image.metadata.description}</p> */}
                     </div>
                 </div>
             ))}
