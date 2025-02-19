@@ -228,7 +228,7 @@ const [formData, setFormData] = useState({
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
-    }).replace(',', '').replace(/\//g, '.');
+    }).replace(/\//g, '.');
   }
 
  
@@ -323,7 +323,7 @@ const [formData, setFormData] = useState({
       {!isMobile && (
         <>
           <div className="top-wrapper">
-            <h1>WC / US / {formatDate1(date)} </h1>
+            <h1>Web Collage / US / {formatDate1(date)} </h1>
             {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}

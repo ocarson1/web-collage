@@ -46,15 +46,15 @@ const ImageGenerator = ({ imageData, borderColor}) => {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
       
       return {
-        x: Math.max(0, Math.min(x - left + scrollX, width - 100)),
-        y: Math.max(0, Math.min(y - top + scrollY, height - 100))
+        x: Math.max(-100, Math.min(x - left + scrollX, width - 100)),
+        y: Math.max(-100, Math.min(y - top + scrollY, height - 100))
       };
     }
     
     // For random positioning
     return {
-      x: Math.max(0, Math.min(Math.random() * width, width - 100)),
-      y: Math.max(0, Math.min(Math.random() * height, height - 100))
+      x: Math.max(-100, Math.min(-100+ Math.random() * width, width - 100)),
+      y: Math.max(-100, Math.min(-100 + Math.random() * height, height - 100))
     };
   };
   
