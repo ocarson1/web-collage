@@ -278,7 +278,7 @@ const [formData, setFormData] = useState({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="image-generator-section">
+        <div className="image-generator-section" style={{ borderColor: textColor }}>
           <div className="loading-container" style={{ color: textColor }}>
             <p>&nbsp;&nbsp;Loading...</p>
           </div>
@@ -307,7 +307,7 @@ const [formData, setFormData] = useState({
     }
   
     return (
-      <div className="image-generator-section">
+      <div className="image-generator-section" style={{ borderColor: textColor }}>
         <div className="image-generator-wrapper" ref={captureRef}>
           <ImageGenerator imageData={imageUrls} borderColor={textColor} />
         </div>
