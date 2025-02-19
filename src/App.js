@@ -371,7 +371,7 @@ const [formData, setFormData] = useState({
               </div>
             </div>
   
-            <hr style={{ borderColor: textColor }}></hr>
+            <hr style={{ backgroundColor: textColor }}></hr>
           </div>
         </>
       )}
