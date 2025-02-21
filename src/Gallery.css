@@ -31,6 +31,8 @@
     /* Add these to center the inner wrapper */
     display: flex;
     justify-content: center;
+    cursor: pointer;
+
   }
   
   /* Create a wrapper div around your img */
@@ -173,7 +175,7 @@
 
 /* Add some basic animation for the modal */
 .modal-overlay {
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
