@@ -1,23 +1,22 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './ImageGenerator.css';
 
-
-const ImageGenerator = ({ imageData, borderColor}) => {
+const ImageGenerator = ({ imageData, borderColor }) => {
+  // State declarations
   const [images, setImages] = useState([]);
   const [draggedImage, setDraggedImage] = useState(null);
   const [resizingImage, setResizingImage] = useState(null);
   const [maxZIndex, setMaxZIndex] = useState(1);
   const [shiftPressed, setShiftPressed] = useState(false);
  
-  React.useEffect(() => {
+  // Keyboard event handlers
+  useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.shiftKey) {
         setShiftPressed(true);
       }
     };
-
-
 
     const handleKeyUp = (e) => {
       if (!e.shiftKey) {
@@ -34,6 +33,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     };
   }, []);
 
+  // Position calculation utility
   const getRandomPosition = (x, y) => {
     const container = document.querySelector('.image-generator-container');
     if (!container) return { x: 0, y: 0 }; // Fallback if container not found
@@ -42,22 +42,23 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     
     if (x !== undefined && y !== undefined) {
       // Calculate position relative to container, accounting for scroll
-      const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
-      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      // const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+      // const scrollY = window.pageYOffset || document.documentElement.scrollTop;
       
       return {
-        x: Math.max(-100, Math.min(x - left + scrollX, width - 100)),
-        y: Math.max(-100, Math.min(y - top + scrollY, height - 100))
+        x: x - left - 100,
+        y: y - top - 100
       };
     }
     
     // For random positioning
     return {
-      x: Math.max(-100, Math.min(-100+ Math.random() * width, width - 100)),
+      x: Math.max(-100, Math.min(-100 + Math.random() * width, width - 100)),
       y: Math.max(-100, Math.min(-100 + Math.random() * height, height - 100))
     };
   };
   
+  // Image creation
   const createNewImage = (position) => {
     const randomIndex = Math.floor(Math.random() * imageData.length);
     const randomImage = imageData[randomIndex];
@@ -82,6 +83,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     }
   };
   
+  // Touch event handler
   const handleTouch = (e) => {
     if (e.target.classList.contains('draggable-image')) return;
     
@@ -94,9 +96,20 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     createNewImage(position);
   };
 
-  // Handle key press to generate new image
-  const handleKeyPress = useCallback((event) => {
+  // Click event handler for creating new images
+  const handleContainerClick = (e) => {
+    // Check if the click is directly on the container element itself (not child elements)
+    if (e.target.classList.contains('image-generator-container')) {
+      console.log("Click detected on container");
+      
+      // Create a new image at the click position
+      const position = getRandomPosition(e.clientX, e.clientY);
+      createNewImage(position);
+    }
+  };
 
+  // Keyboard event handler for image generation
+  const handleKeyPress = useCallback((event) => {
     const activeElement = document.activeElement;
     const isInput = activeElement.tagName === 'INPUT' || 
                     activeElement.tagName === 'TEXTAREA';
@@ -104,6 +117,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     if (isInput) {
         return;
     }
+    
     // Define the keys that can trigger image generation
     const validKeys = [
       ...Array.from({length: 26}, (_, i) => String.fromCharCode(97 + i)), // a-z
@@ -137,7 +151,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     }
   }, [imageData, maxZIndex]);
 
-  // Prevent default dragging behavior
+  // Drag and drop handlers
   const preventDragHandler = (e) => {
     e.preventDefault();
   };
@@ -186,6 +200,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
   };
   
   const handleDrag = useCallback((e) => {
+    // Handle image dragging
     if (draggedImage) {
       const container = document.querySelector('.image-generator-container');
       if (!container) return;
@@ -208,6 +223,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
       );
     }
   
+    // Handle image resizing
     if (resizingImage) {
       setImages(prev =>
         prev.map(img => {
@@ -232,9 +248,9 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     setResizingImage(null);
   }, []);
 
-  // Start resizing
+  // Resize handlers
   const handleResizeStart = (e, imageId) => {
-    console.log("resize starting")
+    console.log("resize starting");
     e.preventDefault();
     e.stopPropagation();
     const image = images.find(img => img.id === imageId);
@@ -248,17 +264,18 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     });
   };
 
-  // Remove an image on right-click
+  // Context menu handler (right-click)
   const handleContextMenu = (e, imageId) => {
     e.preventDefault(); // Prevent default context menu
     setImages(prev => prev.filter(img => img.id !== imageId));
   };
 
-  // Add event listeners
-  React.useEffect(() => {
+  // Global event listeners
+  useEffect(() => {
     const container = document.querySelector('.image-generator-container');
     if (container) {
       container.addEventListener('touchstart', handleTouch);
+      container.addEventListener('click', handleContainerClick);
     }
 
     window.addEventListener('keypress', handleKeyPress);
@@ -268,6 +285,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     return () => {
       if (container) {
         container.removeEventListener('touchstart', handleTouch);
+        container.removeEventListener('click', handleContainerClick);
       }
       window.removeEventListener('keypress', handleKeyPress);
       window.removeEventListener('mousemove', handleDrag);
@@ -275,6 +293,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
     };
   }, [handleKeyPress, handleDrag, handleDragEnd]);
 
+  // Render function
   return (
     <div className="image-generator-container">
       {images.map(image => (
@@ -293,21 +312,20 @@ const ImageGenerator = ({ imageData, borderColor}) => {
         >
           <div className="image-wrapper">
             {shiftPressed ? (
-              <div 
-                className="image-metadata" style={{border: `2px solid ${borderColor}`}}>
-                  <div 
-      style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        fontSize: '1.5em',
-        fontWeight: 'bold',
-      }}
-    >
-      {image.triggerKey}
-    </div>
+              <div className="image-metadata" style={{border: `2px solid ${borderColor}`}}>
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    fontSize: '1.5em',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {image.triggerKey}
+                </div>
                 <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                &quot;{image.parentTitle}&quot;
+                  &quot;{image.parentTitle}&quot;
                 </h3>
                 <a 
                   href={image.newsItemUrl} 
@@ -326,23 +344,22 @@ const ImageGenerator = ({ imageData, borderColor}) => {
                   {image.newsItemUrl}
                 </a>
                 <div 
-          className="resize-handle"
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            width: '15px',
-            height: '15px',
-            background: 'rgba(255,255,255,0.5)', // More visible on transparent background
-            cursor: 'nwse-resize',
-            zIndex: 10
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            handleResizeStart(e, image.id);
-          }}
-        />
- 
+                  className="resize-handle"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: '15px',
+                    height: '15px',
+                    background: 'rgba(255,255,255,0.5)',
+                    cursor: 'nwse-resize',
+                    zIndex: 10
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    handleResizeStart(e, image.id);
+                  }}
+                />
               </div>
             ) : (
               <img 
@@ -363,13 +380,13 @@ const ImageGenerator = ({ imageData, borderColor}) => {
               />
             )}
             <div 
-          className="resize-handle"
-          style={{ display: 'none' }} // Hide resize handle in image view
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            handleResizeStart(e, image.id);
-          }}
-        />
+              className="resize-handle"
+              style={{ display: 'none' }} // Hide resize handle in image view
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                handleResizeStart(e, image.id);
+              }}
+            />
           </div>
         </div>
       ))}
@@ -377,7 +394,7 @@ const ImageGenerator = ({ imageData, borderColor}) => {
   );
 };
 
-// Update PropTypes to match new data structure
+// PropTypes validation
 ImageGenerator.propTypes = {
   imageData: PropTypes.arrayOf(
     PropTypes.shape({
@@ -389,7 +406,5 @@ ImageGenerator.propTypes = {
   ).isRequired,
   borderColor: PropTypes.string
 };
-
-
 
 export default ImageGenerator;

@@ -9,42 +9,25 @@ import domtoimage from 'dom-to-image'
 import { saveAs } from "file-saver";
 import { isMobile } from "react-device-detect";
 
-
-
-
-
 function App() {
-  // State to store the pictures
+
   const [imageUrls, setImageUrls] = useState([]);
   const [color, setColor] = useState(null);
   const [textColor, setTextColor] = useState("#000000");
-  // const [showTimestamp, setShowTimestamp] = useState(false);
 
-  // New states for loading and error handling
+  // States for loading and error handling
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
-
   //Gallery functionality
   const [galImages, setGalImages] = useState([]);
-
   const [date, setDate] = useState(new Date())
-
-const [formData, setFormData] = useState({
-  image: null,
-  title: '',
-  description: 'somewhere'
-
-})
-
-// const handleChange = (e) => {
-//   const {name, value} = e.target;
-//   setFormData(prevData => ({
-//     ...prevData,
-//     [name]: value
-//   }))
-// }
+  const [formData, setFormData] = useState({
+    image: null,
+    title: '',
+    description: 'somewhere'
+  })
 
   const fetchGallery = async () => {
     setIsLoading(true);
@@ -69,7 +52,6 @@ const [formData, setFormData] = useState({
         console.error("Unexpected API response format:", pictures);
       }
 
-
       setGalImages(pictures);
       setIsLoading(false);
 
@@ -77,12 +59,8 @@ const [formData, setFormData] = useState({
       console.error('Error fetching trends:', error);
       setError(error.message);
       setIsLoading(false);
-
     }
-
   }
-
-
 
   const fetchTrends = async () => {
     // Reset loading and error states
@@ -136,20 +114,16 @@ const [formData, setFormData] = useState({
     }
 
     domtoimage
-    .toBlob(node, {
+      .toBlob(node, {
+        bgcolor: color
+      }
 
-      bgcolor: color
-
-    }
-
-    )
-    .then(async (blob) => {  // Note the async here
-      // Save the Blob as a file
-      saveAs(blob, "captured-content.png");
-
-
-  })
-}
+      )
+      .then(async (blob) => {  // Note the async here
+        // Save the Blob as a file
+        saveAs(blob, "captured-content.png");
+      })
+  }
 
   const handleCaptureAndSave = () => {
     const node = captureRef.current;
@@ -159,65 +133,54 @@ const [formData, setFormData] = useState({
       return;
     }
 
-  //   if ( !formData.description.trim()) {
-  //     // You could show an error message to the user here
-  //     console.error("Title and description are required!");
-  //     setFormData(prevData => ({
-  //       ...prevData,
-  //       description: "somewhere", 
-  //     }))
-  // }
-
     domtoimage
-    .toBlob(node, {
-
-      bgcolor: color
-
-    }
-
-    )
-    .then(async (blob) => {  // Note the async here
-      // Save the Blob as a file
-
-      setFormData(prevData => ({
-        ...prevData,
-        image: blob, 
-      }))
-
-      const formDataToSubmit = new FormData();
-      formDataToSubmit.append('image', blob, 'captured-content.png');
-      formDataToSubmit.append('title', formatDate1(date));
-      formDataToSubmit.append('description', 'Submitted from ' + formData.description);
-  
-      console.log('form data', formData)
-      // const formData = new FormData();
-      // formData.append('image', blob, 'captured-content.png'); // Added filename
-      // formData.append('title', "Image");
-      // formData.append('description', "Description");
-  
-      try {
-        // Await the fetch
-        const response = await fetch('https://web-collage-backend.onrender.com/upload', {
-          method: 'POST',
-          body: formDataToSubmit,
-        });
-  
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-  
-        // Await the json parsing
-        const result = await response.json();
-        console.log('Upload successful:', result);
-        alert('Upload successful! Refresh to see your collage in the live gallery.');
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred during upload: ' + error.message);
+      .toBlob(node, {
+        bgcolor: color
       }
-    })
-    .catch((error) => {
-      console.error("Oops, something went wrong!", error);
-    });
+
+      )
+      .then(async (blob) => {  // Note the async here
+        // Save the Blob as a file
+
+        setFormData(prevData => ({
+          ...prevData,
+          image: blob,
+        }))
+
+        const formDataToSubmit = new FormData();
+        formDataToSubmit.append('image', blob, 'captured-content.png');
+        formDataToSubmit.append('title', formatDate1(date));
+        formDataToSubmit.append('description', 'Submitted from ' + formData.description);
+
+        console.log('form data', formData)
+        // const formData = new FormData();
+        // formData.append('image', blob, 'captured-content.png'); // Added filename
+        // formData.append('title', "Image");
+        // formData.append('description', "Description");
+
+        try {
+          // Await the fetch
+          const response = await fetch('https://web-collage-backend.onrender.com/upload', {
+            method: 'POST',
+            body: formDataToSubmit,
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Await the json parsing
+          const result = await response.json();
+          console.log('Upload successful:', result);
+          alert('Upload successful! Refresh to see your collage in the live gallery.');
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred during upload: ' + error.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Oops, something went wrong!", error);
+      });
   };
 
   function formatDate1(date) {
@@ -231,7 +194,7 @@ const [formData, setFormData] = useState({
     }).replace(/\//g, '.');
   }
 
- 
+
   const handleColorChange = (event) => {
     const selectedColor = event.target.value;
     setColor(selectedColor);
@@ -241,22 +204,22 @@ const [formData, setFormData] = useState({
     document.body.style.backgroundColor = selectedColor;
   };
 
-   // UseEffect to handle the fetch operation
-   useEffect(() => {
+  // UseEffect to handle the fetch operation
+  useEffect(() => {
     setDate(new Date())
     fetchTrends();
     fetchGallery();
-      const initialColor = `#f0f0f0`; // e.g., '#ffffff' or 'blue'
-     // Random Color
-     // // `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
-      setColor(initialColor);
-      setTextColor(getAccessibleTextColor(initialColor));
-      document.documentElement.style.backgroundColor = initialColor;
-      document.body.style.backgroundColor = initialColor;
+    const initialColor = `#f0f0f0`; // e.g., '#ffffff' or 'blue'
+    // Random Color
+    // // `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+    setColor(initialColor);
+    setTextColor(getAccessibleTextColor(initialColor));
+    document.documentElement.style.backgroundColor = initialColor;
+    document.body.style.backgroundColor = initialColor;
 
 
   }, []); // Empty dependency array means this runs once on component mount
-  
+
 
 
   const getAccessibleTextColor = (hexColor) => {
@@ -285,7 +248,7 @@ const [formData, setFormData] = useState({
         </div>
       );
     }
-  
+
     if (error) {
       return (
         <div className="error-container" style={{ color: textColor }}>
@@ -305,7 +268,7 @@ const [formData, setFormData] = useState({
         </div>
       );
     }
-  
+
     return (
       <div className="image-generator-section" style={{ borderColor: textColor }}>
         <div className="image-generator-wrapper" ref={captureRef}>
@@ -314,11 +277,11 @@ const [formData, setFormData] = useState({
       </div>
     );
   };
-  
+
   return (
     <div className="app-container" style={{ background: color, color: textColor }}>
       <Analytics />
-  
+
       {/* Desktop-only content */}
       {!isMobile && (
         <>
@@ -328,9 +291,9 @@ const [formData, setFormData] = useState({
             <br></br>
             {renderContent()}
           </div>
-  
+
           <div className="content-section">
-  
+
             <div className="grid-container">
               <div style={{ lineHeight: "1.25" }}>
                 <Instructions color={textColor} />
@@ -360,31 +323,31 @@ const [formData, setFormData] = useState({
                   />
                 </p> */}
                 <div className="buttons">
-                <div>
-                  <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
-                </div>
-                <br></br>
-                <div>
-                  <button onClick={handleDownload}>Download</button>
-                </div>
+                  <div>
+                    <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
+                  </div>
+                  <br></br>
+                  <div>
+                    <button onClick={handleDownload}>Download</button>
+                  </div>
                 </div>
               </div>
             </div>
-  
+
             <hr style={{ backgroundColor: textColor }}></hr>
           </div>
         </>
       )}
-  
+
       {/* Mobile-only message */}
       {isMobile && (
         <div>
-        <p style={{ padding: "20px" }}>
-          Submit collages on desktop to this public gallery!
-        </p>
+          <p style={{ padding: "20px" }}>
+            Submit collages on desktop to this public gallery!
+          </p>
         </div>
       )}
-  
+
       {/* Gallery always appears */}
       <Gallery images={galImages} />
     </div>

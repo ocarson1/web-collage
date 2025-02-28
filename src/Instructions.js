@@ -47,11 +47,11 @@ const Instructions = ({color}) => {
     <div style={{ lineHeight: "1.25" }}>
       <p style={{ lineHeight: "1.25" }}>
         <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>
-        Generate trending search images using keyboard input <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>a</span> → <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>z</span>.
+        Generate trending images by clicking or using keyboard input <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>a</span> → <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>z</span>.
       </p>
       <p style={{ lineHeight: "1.25" }}>
         <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>
-        Hold <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>Shift</span> to view image details.
+        Hold <span className="key-input" style={{ border: `1.75px solid ${textColor}` }}>Shift</span> to view image info.
       </p>
       <p>
         <span className="bold">⁕&nbsp;&nbsp;</span>

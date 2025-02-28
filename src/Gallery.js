@@ -3,11 +3,6 @@ import PropTypes from 'prop-types';
 import './Gallery.css';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-
-
-
-
-
 const Gallery = ({ images }) => {
 
 
