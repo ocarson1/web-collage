@@ -9,6 +9,9 @@ import domtoimage from 'dom-to-image'
 import { saveAs } from "file-saver";
 import { isMobile } from "react-device-detect";
 
+import downloadIcon from './components/download.svg'
+import paintIcon from './components/paint.svg'
+
 function App() {
 
   const [imageUrls, setImageUrls] = useState([]);
@@ -270,11 +273,27 @@ function App() {
     }
 
     return (
-      <div className="image-generator-section" style={{ borderColor: textColor }}>
-        <div className="image-generator-wrapper" ref={captureRef}>
-          <ImageGenerator imageData={imageUrls} borderColor={textColor} />
+      <div className="interface-wrapper">
+        <div className="image-generator-section" style={{ borderColor: textColor }}>
+          <div className="image-generator-wrapper" ref={captureRef}>
+            <ImageGenerator imageData={imageUrls} borderColor={textColor} />
+          </div>
+        </div>
+        <div className="options">
+          <h1>{formatDate1(date)}</h1>
+          <div className="buttons">
+            <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
+            <button className="button-download" onClick={handleDownload}>
+              <img src={downloadIcon}></img>
+            </button>
+          </div>
+
+
+
+
         </div>
       </div>
+
     );
   };
 
@@ -286,7 +305,7 @@ function App() {
       {!isMobile && (
         <>
           <div className="top-wrapper">
-            <h1>Web Collage / US / {formatDate1(date)} </h1>
+            {/* <h1 style={{ color: 'grey' }}>webcollage.xyz</h1> */}
             {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}
@@ -299,8 +318,9 @@ function App() {
                 <Instructions color={textColor} />
               </div>
               <div>
-                <p>
-                  Background Color:
+
+                <div className="color-controls">
+                 <img className="paint-icon" src={paintIcon}></img>
                   <input
                     type="color"
                     value={color}
@@ -309,8 +329,8 @@ function App() {
                       cursor: "pointer",
                       verticalAlign: "text-top",
                     }}
-                  />
-                </p>
+                  ></input>
+                </div>
               </div>
               <div>
                 {/* <p>
@@ -322,7 +342,7 @@ function App() {
                     onChange={handleChange}
                   />
                 </p> */}
-                <div className="buttons">
+                {/* <div className="buttons">
                   <div>
                     <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
                   </div>
@@ -330,7 +350,7 @@ function App() {
                   <div>
                     <button onClick={handleDownload}>Download</button>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 

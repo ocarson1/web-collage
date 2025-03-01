@@ -3,13 +3,18 @@
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
+  /* font-family: 'Roboto', sans-serif; */
   font-size: 1em
   
 }
 
+h1, h2 {
+  font-size:1.25em;
+  margin:0;
+  padding:0;
+}
 
-h1, h2, h3, h4, h5, h6 {
+h3, h4, h5, h6 {
   font-size: 1em;
   position: relative;
   margin: 0;
@@ -25,6 +30,7 @@ h1, h2, h3, h4, h5, h6 {
 hr {
   height: 1px;
   border: none;
+  max-width: 1080px;
 }
 
 input {
@@ -66,6 +72,13 @@ input {
   overflow: hidden; /* Change from 'auto' to 'hidden' */
 }
 
+.interface-wrapper {
+  position: relative;
+  max-width: 1080px;
+  margin: auto;
+}
+
+
 .image-generator-section {
   max-width:1080px;
 
@@ -93,8 +106,10 @@ input {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr; /* Creates 3 equal columns */
+  grid-template-columns: 2fr 1fr; 
   gap: 10px; /* Adds space between columns */
+  max-width: 1080px;
+  margin: auto;
 }
 
 
@@ -122,17 +137,39 @@ input {
 button {
   font-size: 16px;
   width: 8em;
-  padding:0.5em
+  height: 100%;
+  padding: 0.25em;
 }
 
 .buttons {
-  margin-top: 1em;
+  gap: 0.5em;
   display: flex;
   align-items: end;
   justify-content: right;
-  flex-direction: column;
+  flex-direction: row;
 }
 
-.button-submit {
+.button-download {
+  width: 60px;
+}
 
+.options {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  right: 0;
+  justify-content:space-between;
+  margin: 0.5em 0;
+}
+
+.paint-icon {
+  width: 50px;
+}
+
+.color-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.5em 0;
 }

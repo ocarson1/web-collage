@@ -41,7 +41,7 @@ const reversedImages = [...images].reverse();
     return (
         <div className="gallery-section">
                     <div className="gallery-container">
-                    <p style={{ lineHeight: "1.25", fontWeight: "bold" }}>PUBLIC GALLERY</p><br></br>
+                    {/* <h2 style={{ maxWidth: '1080px', margin: 'auto', lineHeight: "1.25", fontWeight: "bold", marginBottom: "2em" }}>GALLERY</h2><br></br> */}
 
         <div className="gallery-grid">
 
