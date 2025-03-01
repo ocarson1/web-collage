@@ -10,7 +10,7 @@ import { saveAs } from "file-saver";
 import { isMobile } from "react-device-detect";
 
 import downloadIcon from './components/download.svg'
-import paintIcon from './components/paint.svg'
+// import paintIcon from './components/paint.svg'
 
 function App() {
 
@@ -320,7 +320,8 @@ function App() {
               <div>
 
                 <div className="color-controls">
-                 <img className="paint-icon" src={paintIcon}></img>
+                 {/* <img className="paint-icon" src={paintIcon}></img> */}
+                 <div>Background Color:</div>
                   <input
                     type="color"
                     value={color}

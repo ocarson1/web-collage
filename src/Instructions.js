@@ -46,23 +46,23 @@ const Instructions = ({color}) => {
   const DesktopInstructions = () => (
     <div style={{ lineHeight: "1.25" }}>
       <p style={{ lineHeight: "1.25" }}>
-        <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>
+        {/* <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span> */}
         Generate trending images by clicking or using keyboard input <span className="key-input" style={{ border: `1px solid ${textColor}` }}>a</span> → <span className="key-input" style={{ border: `1px solid ${textColor}` }}>z</span>.
       </p>
       <p style={{ lineHeight: "1.25" }}>
-        <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span>
+        {/* <span className="bold" style={{ lineHeight: "1.25" }}>⁕&nbsp;&nbsp;</span> */}
         Hold <span className="key-input" style={{ border: `1px solid ${textColor}` }}>Shift</span> to view image info.
       </p>
       <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
+        {/* <span className="bold">⁕&nbsp;&nbsp;</span> */}
         Expand an image by dragging its bottom-right corner.
       </p>
       <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
+        {/* <span className="bold">⁕&nbsp;&nbsp;</span> */}
         Right-click on an image to remove it.
       </p>
       <p>
-        <span className="bold">⁕&nbsp;&nbsp;</span>
+        {/* <span className="bold">⁕&nbsp;&nbsp;</span> */}
         Refreshing the page will clear all content.
       </p>
     </div>
