@@ -10,9 +10,50 @@ import { saveAs } from "file-saver";
 import { isMobile } from "react-device-detect";
 
 import downloadIcon from './components/download.svg'
-// import paintIcon from './components/paint.svg'
+
+import { io } from "socket.io-client"
+
 
 function App() {
+
+
+  const socketRef = useRef(null);
+
+  // Initialize socket once when component mounts
+  useEffect(() => {
+    const serverURL = "https://web-collage-backend.onrender.com";
+    socketRef.current = io(serverURL);
+    
+    socketRef.current.on("connect", () => {            
+      console.log("Connected to server!");
+    });
+    
+    // Clean up on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  const sendBang = () => {
+    console.log("sending");
+    if (socketRef.current) {
+      socketRef.current.emit("bang");
+    } else {
+      console.error("Socket not connected");
+    }
+  }
+// socket.on("bang", () => {
+//    document.getElementById("recieveBang").style.background="green";
+//    setTimeout( () => document.getElementById("recieveBang").style.background="", 100);
+// });
+
+// document.querySelector("#sendBang").onclick = () => {
+//   socket.emit("bang");
+// };
+
+
 
   const [imageUrls, setImageUrls] = useState([]);
   const [color, setColor] = useState(null);
@@ -22,6 +63,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+
 
   //Gallery functionality
   const [galImages, setGalImages] = useState([]);
@@ -64,6 +106,7 @@ function App() {
       setIsLoading(false);
     }
   }
+
 
   const fetchTrends = async () => {
     // Reset loading and error states
@@ -138,7 +181,21 @@ function App() {
 
     domtoimage
       .toBlob(node, {
-        bgcolor: color
+        bgcolor: color,
+        filter: (node) => {
+          // Example: remove the "highlight" class from all nodes
+          if (node.classList && node.classList.contains('selected-image')) {
+            console.log("STYLECHECK")
+            node.style.outline = 'none';
+          }
+        
+          if (node.classList && node.classList.contains('exclude-from-capture')) {
+            return false;
+          }
+        
+          return true;
+        }
+      
       }
 
       )
@@ -276,7 +333,7 @@ function App() {
       <div className="interface-wrapper">
         <div className="image-generator-section" style={{ borderColor: textColor }}>
           <div className="image-generator-wrapper" ref={captureRef}>
-            <ImageGenerator imageData={imageUrls} borderColor={textColor} />
+            <ImageGenerator imageData={imageUrls} borderColor={textColor} onSendBang={sendBang} />
           </div>
         </div>
         <div className="options">
@@ -300,7 +357,10 @@ function App() {
   return (
     <div className="app-container" style={{ background: color, color: textColor }}>
       <Analytics />
-
+      {/* <input id="recieveBang" className="bang" type="button" value="recieve bang"></input>
+      <input id="sendBang" className="bang" type="button" value="send bang" onClick={sendBang} ></input> */}
+      
+  
       {/* Desktop-only content */}
       {!isMobile && (
         <>
@@ -334,24 +394,6 @@ function App() {
                 </div>
               </div>
               <div>
-                {/* <p>
-                  Submitted from&nbsp;
-                  <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                  />
-                </p> */}
-                {/* <div className="buttons">
-                  <div>
-                    <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
-                  </div>
-                  <br></br>
-                  <div>
-                    <button onClick={handleDownload}>Download</button>
-                  </div>
-                </div> */}
               </div>
             </div>
 
