@@ -10,7 +10,7 @@ import { ReactComponent as ResetIcon } from './components/reset.svg';
 // import trash from './components/trash.svg';
 
 
-const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, currentColor, currentTextColor}) => {
+const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgColor}) => {
   // State declarations
   const [images, setImages] = useState([]);
   const [draggedImage, setDraggedImage] = useState(null);
@@ -158,9 +158,12 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
         newsItemUrl: randomImage.newsItemUrl,
         width: dimensions.width,
         height: dimensions.height,
+        originalWidth: dimensions.width, // Store original dimensions for mask scaling
+        originalHeight: dimensions.height,
         zIndex: newMaxZIndex,
         triggerKey: randomImage.key,
-        maskPath: null // Initialize with no mask
+        maskPath: null, // Initialize with no mask
+        originalMaskPath: null // Store original mask path
       };
   
       setImages(prev => [...prev, newImage]);
@@ -240,9 +243,12 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
           newsItemUrl: imageData[index].newsItemUrl,
           width: img.naturalWidth,
           height: img.naturalHeight,
+          originalWidth: img.naturalWidth, // Store original dimensions for mask scaling
+          originalHeight: img.naturalHeight,
           zIndex: newMaxZIndex,
           triggerKey: key,
-          maskPath: null // Initialize with no mask
+          maskPath: null, // Initialize with no mask
+          originalMaskPath: null // Store original mask path
         };
 
         setImages(prev => [...prev, newImage]);
@@ -258,9 +264,12 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
           newsItemUrl: imageData[index].newsItemUrl,
           width: 400, // Fallback width
           height: 200, // Fallback height
+          originalWidth: 400, // Store original dimensions for mask scaling
+          originalHeight: 200,
           zIndex: newMaxZIndex,
           triggerKey: key,
-          maskPath: null // Initialize with no mask
+          maskPath: null, // Initialize with no mask
+          originalMaskPath: null // Store original mask path
         };
 
         setImages(prev => [...prev, newImage]);
@@ -356,11 +365,23 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
           if (img.id === resizingImage.id) {
             const newWidth = Math.max(50, resizingImage.startWidth + (e.clientX - resizingImage.startX));
             const newHeight = Math.max(50, resizingImage.startHeight + (e.clientY - resizingImage.startY));
+            
+            // Scale mask if exists
+            let scaledMaskPath = null;
+            if (img.originalMaskPath) {
+              // Calculate scale factors
+              const scaleX = newWidth / img.originalWidth;
+              const scaleY = newHeight / img.originalHeight;
+              
+              // Scale the path by applying the transformation matrix
+              scaledMaskPath = scaleSvgPath(img.originalMaskPath, scaleX, scaleY);
+            }
   
             return {
               ...img,
               width: newWidth,
-              height: newHeight
+              height: newHeight,
+              maskPath: scaledMaskPath
             };
           }
           return img;
@@ -390,6 +411,48 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
       startWidth: image.width,
       startHeight: image.height
     });
+  };
+
+  // Function to scale SVG path
+  const scaleSvgPath = (pathData, scaleX, scaleY) => {
+    if (!pathData) return null;
+    
+    // Regular expression to extract coordinates from SVG path
+    const regex = /([ML])(\d+\.?\d*),(\d+\.?\d*)/g;
+    
+    // Replace coordinates with scaled versions
+    return pathData.replace(regex, (match, command, x, y) => {
+      const scaledX = parseFloat(x) * scaleX;
+      const scaledY = parseFloat(y) * scaleY;
+      return `${command}${scaledX},${scaledY}`;
+    });
+  };
+
+  const IconWithBackground = ({ children }) => (
+    <span style={{ 
+      color: 'black',
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      borderRadius: '50%',
+      padding: '6px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '40px',
+      height: '40px'
+    }}>
+      {children}
+    </span>
+  );
+
+  // Add PropTypes validation
+  IconWithBackground.propTypes = {
+    children: PropTypes.node.isRequired,
+    color: PropTypes.string
+  };
+
+  // You can also add default props if needed
+  IconWithBackground.defaultProps = {
+    color: 'currentColor'
   };
 
   // Context menu handler (right-click)
@@ -517,7 +580,11 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
     // Apply to selected image
     setImages(prev => prev.map(img => 
       img.id === selectedImageId 
-        ? { ...img, maskPath: svgPath }
+        ? { 
+            ...img, 
+            maskPath: svgPath,
+            originalMaskPath: svgPath // Store original for scaling
+          }
         : img
     ));
     
@@ -539,7 +606,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
     
     setImages(prev => prev.map(img => 
       img.id === selectedImageId 
-        ? { ...img, maskPath: null }
+        ? { ...img, maskPath: null, originalMaskPath: null }
         : img
     ));
   };
@@ -618,189 +685,218 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, cur
               width: `${image.width}px`,
               height: `${image.height}px`,
               zIndex: image.zIndex || 1,
-              clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none',
-              outline: selectedImageId === image.id ? '2px dashed yellow' : 'none',
+              outline: selectedImageId === image.id ? '2px dashed black' : 'none',
               position: 'absolute'
             }}
             onMouseDown={(e) => handleDragStart(e, image.id)}
             onContextMenu={(e) => handleContextMenu(e, image.id)}
           >
-            <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
-              {shiftPressed ? (
-                <div className="image-metadata" style={{
-                  border: `2px solid ${borderColor}`,
-                  width: '100%',
-                  height: '100%',
-                  boxSizing: 'border-box',
-                  position: 'relative',
-                  padding: '10px',
-                  overflow: 'hidden'
-                }}>
-                  <div 
-                    style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      fontSize: '1.5em',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {image.triggerKey}
-                  </div>
-                  <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                    &quot;{image.parentTitle}&quot;
-                  </h3>
-                  <a 
-                    href={image.newsItemUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ 
-                      color: `${borderColor}`, 
-                      textDecoration: 'underline', 
-                      fontSize: '0.8em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      display: 'block'
-                    }}
-                  >
-                    {image.newsItemUrl}
-                  </a>
-                  <div 
-                    className="resize-handle"
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      right: 0,
-                      width: '15px',
-                      height: '15px',
-                      background: 'rgba(255,255,255,0.5)',
-                      cursor: 'nwse-resize',
-                      zIndex: 10
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      handleResizeStart(e, image.id);
-                    }}
-                  />
-                </div>
-              ) : (
-                <img 
-                  src={image.src} 
-                  alt={image.parentTitle}
-                  title={`Source: ${image.newsItemUrl}`}
-                  className="generated-image"
-                  style={{
+            {/* This inner div will handle the mask */}
+            <div 
+              className="image-content"
+              style={{ 
+                width: '100%', 
+                height: '100%',
+                position: 'relative',
+                clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none'
+              }}
+            >
+              <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
+                {shiftPressed ? (
+                  <div className="image-metadata" style={{
+                    border: `2px solid ${borderColor}`,
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover'
-                  }}
-                  draggable="false"
-                  onDragStart={preventDragHandler}
-                  onError={(e) => {
-                    console.error('Image failed to load', e);
-                  }}
-                />
-              )}
-              <div 
-                className="resize-handle"
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  right: 0,
-                  width: '15px',
-                  height: '15px',
-                  background: 'rgba(255,255,255,0.5)',
-                  cursor: 'nwse-resize',
-                  zIndex: 10,
-                  display: shiftPressed ? 'none' : 'block'
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  handleResizeStart(e, image.id);
-                }}
-              />
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    padding: '10px',
+                    overflow: 'hidden'
+                  }}>
+                    <div 
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        fontSize: '1.5em',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {image.triggerKey}
+                    </div>
+                    <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
+                      &quot;{image.parentTitle}&quot;
+                    </h3>
+                    <a 
+                      href={image.newsItemUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        color: `${borderColor}`, 
+                        textDecoration: 'underline', 
+                        fontSize: '0.8em',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'block'
+                      }}
+                    >
+                      {image.newsItemUrl}
+                    </a>
+                  </div>
+                ) : (
+                  <img 
+                    src={image.src} 
+                    alt={image.parentTitle}
+                    title={`Source: ${image.newsItemUrl}`}
+                    className="generated-image"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    draggable="false"
+                    onDragStart={preventDragHandler}
+                    onError={(e) => {
+                      console.error('Image failed to load', e);
+                    }}
+                  />
+                )}
+              </div>
             </div>
+            
+            {/* Resize handle outside of masked content */}
+            <div 
+              className="resize-handle"
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                width: '15px',
+                height: '15px',
+                background: 'rgba(255,255,255,0.5)',
+                cursor: 'nwse-resize',
+                zIndex: 10
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                handleResizeStart(e, image.id);
+              }}
+            />
           </div>
         ))}
       </div>
       
       {/* Control sidebar */}
-
-
       <div className="controls-sidebar exclude-from-capture" style={{
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  zIndex: 9999,
-  padding: '15px',
-  display: 'flex',
-  flexDirection: 'row',
-  gap: '20px'
-}}>
-  {/* Color control using hidden input */}
-  <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-    <label style={{ cursor: 'pointer', width: '40px', height: '40px' }} title="Pick Background Color">
-      <BucketIcon style={{ width: '100%', height: '100%', fill: currentTextColor }} />
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: 9999,
+        padding: '15px',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '20px'
+      }}>
+        {/* Color control using hidden input */}
+        <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <label 
+            style={{ 
+              cursor: 'pointer',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              borderRadius: '50%',
+              padding: '6px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '40px',
+              height: '40px',
+              boxSizing: 'border-box'  // Added to match others
+            }} 
+            title="Pick Background Color"
+          >
+            <BucketIcon style={{ width: '24px', height: '24px', color: 'black' }} />
+            <input
+              type="color"
+              value={bgColor}
+              onChange={handleColorChange}
+              style={{
+                position: 'absolute',
+                opacity: 0,
+                width: '0.1px',
+                height: '0.1px',
+                overflow: 'hidden',
+                pointerEvents: 'none'
+              }}
+            />
+          </label>
+        </div>
 
-      <input
-        type="color"
-        value={currentColor}
-        onChange={handleColorChange}
-        style={{
-          position: 'absolute',
-          opacity: 0,
-          width: '0.1px',
-          height: '0.1px',
-          overflow: 'hidden',
-          pointerEvents: 'none'
-        }}
-      />
-    </label>
-  </div>
+        {/* Mask controls */}
+        <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
+          <button 
+            onClick={() => setIsDrawingMode(true)}
+            disabled={!selectedImageId || isDrawingMode}
+            style={{
+              width: '40px',
+              height: '40px',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
+              opacity: selectedImageId ? 1 : 0.3,
+            }}
+            title="Draw Mask"
+          >
+            <span style={{ 
+              backgroundColor: isDrawingMode ? 'black' : 'rgba(255, 255, 255, 0.7)',
+              borderRadius: '50%',
+              padding: '6px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '40px',
+              height: '40px',
+              boxSizing: 'border-box'
+            }}>
+              <ScissorsIcon style={{ 
+                width: '24px', 
+                height: '24px', 
+                color: isDrawingMode ? 'white' : 'black' 
+              }} />
+            </span>
+          </button>
 
-  {/* Mask controls */}
-  <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
-    <button 
-      onClick={() => setIsDrawingMode(true)}
-      disabled={!selectedImageId || isDrawingMode}
-      style={{
-        width: '40px',
-        height: '40px',
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
-        opacity: selectedImageId && !isDrawingMode ? 1 : 0.5
-      }}
-      title="Draw Mask"
-    >
-     <span style={{ color: currentTextColor }}>
-    <ScissorsIcon style={{ width: '100%', height: '100%' }} />
-  </span>
-    </button>
-
-    <button 
-      onClick={clearMask}
-      disabled={!selectedImageId}
-      style={{
-        width: '40px',
-        height: '40px',
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        cursor: selectedImageId ? 'pointer' : 'default',
-        opacity: selectedImageId ? 1 : 0.5
-      }}
-      title="Clear Mask"
-    >
-        <span style={{ color: currentTextColor }}>
-    <ResetIcon style={{ width: '100%', height: '100%' }} />
-  </span>
-    </button>     
-
-  </div>
-</div>
+          <button 
+            onClick={clearMask}
+            disabled={!selectedImageId}
+            style={{
+              width: '40px',
+              height: '40px',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: selectedImageId ? 'pointer' : 'default',
+              opacity: selectedImageId ? 1 : 0.3
+            }}
+            title="Clear Mask"
+          >
+            <span style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              borderRadius: '50%',
+              padding: '6px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+       
+              width: '40px',
+              height: '40px',
+              boxSizing: 'border-box'
+            }}>
+              <ResetIcon style={{ width: '24px', height: '24px', color: 'black' }} />
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -811,7 +907,7 @@ ImageGenerator.propTypes = {
   borderColor: PropTypes.string,
   onSendBang: PropTypes.func,
   onColorChange: PropTypes.func.isRequired,
-  currentColor: PropTypes.string.isRequired,
+  bgColor: PropTypes.string.isRequired,
   currentTextColor: PropTypes.string
 };
 
