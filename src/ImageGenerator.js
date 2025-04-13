@@ -2,7 +2,15 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './ImageGenerator.css';
 
-const ImageGenerator = ({ imageData, borderColor, onSendBang }) => {
+import { ReactComponent as BucketIcon } from './components/bucket.svg';
+import { ReactComponent as ScissorsIcon } from './components/scissors.svg';
+import { ReactComponent as ResetIcon } from './components/reset.svg';
+
+
+// import trash from './components/trash.svg';
+
+
+const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, currentColor, currentTextColor}) => {
   // State declarations
   const [images, setImages] = useState([]);
   const [draggedImage, setDraggedImage] = useState(null);
@@ -64,6 +72,28 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang }) => {
       }
     }
   }, [isDrawingMode]);
+
+  const getAccessibleTextColor = (hexColor) => {
+    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
+    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
+    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
+  
+    const [rLin, gLin, bLin] = [r, g, b].map((c) =>
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    );
+  
+    const luminance = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+  
+    return luminance > 0.179 ? "#000000" : "#ffffff";
+  };
+  
+  const handleColorChange = (event) => {
+    const selectedColor = event.target.value;
+    const newTextColor = getAccessibleTextColor(selectedColor);
+    
+    // Call the callback to update parent component
+    onColorChange(selectedColor, newTextColor);
+  };
 
   // Position calculation utility
   const getRandomPosition = (x, y) => {
@@ -539,223 +569,250 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang }) => {
 
   // Render function
   return (
-    <div className="image-generator-container" style={{ position: 'relative' }}>
-      {/* SVG definitions for clip paths */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <defs>
-          {images.map(image => 
-            image.maskPath && (
-              <clipPath id={`mask-${image.id}`} key={`mask-${image.id}`}>
-                <path d={image.maskPath} />
-              </clipPath>
-            )
-          )}
-        </defs>
-      </svg>
-      
-      {/* Drawing canvas overlay */}
-      {isDrawingMode && (
-        <canvas 
-          ref={canvasRef}
-          className="drawing-canvas"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 9999,
-            cursor: 'crosshair'
-          }}
-          onMouseDown={handleDrawStart}
-          onMouseMove={handleDrawMove}
-          onMouseUp={handleDrawEnd}
-          onTouchStart={handleDrawStart}
-          onTouchMove={handleDrawMove}
-          onTouchEnd={handleDrawEnd}
-        />
-      )}
-      
-      {/* Mask controls */}
-      {selectedImageId && (
-        <div className="mask-controls exclude-from-capture" style={{ 
-          position: 'absolute', 
-          top: '10px', 
-          left: '10px', 
-          zIndex: 10000, 
-          background: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          padding: '10px',
-          borderRadius: '5px'
-        }}>
-          <button 
-            onClick={() => setIsDrawingMode(true)}
-            disabled={isDrawingMode}
+    <div className="image-generator-wrapper" style={{ display: 'flex', flexDirection: 'row' }}>
+      <div className="image-generator-container" style={{ position: 'relative', flex: '1' }}>
+        {/* SVG definitions for clip paths */}
+        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+          <defs>
+            {images.map(image => 
+              image.maskPath && (
+                <clipPath id={`mask-${image.id}`} key={`mask-${image.id}`}>
+                  <path d={image.maskPath} />
+                </clipPath>
+              )
+            )}
+          </defs>
+        </svg>
+        
+        {/* Drawing canvas overlay */}
+        {isDrawingMode && (
+          <canvas 
+            ref={canvasRef}
+            className="drawing-canvas"
             style={{
-              marginRight: '10px',
-              padding: '5px 10px',
-              background: isDrawingMode ? '#555' : '#ff4d4d',
-              border: 'none',
-              borderRadius: '3px',
-              color: 'white',
-              cursor: isDrawingMode ? 'default' : 'pointer'
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 9999,
+              cursor: 'crosshair'
             }}
-          >
-            Draw Mask
-          </button>
-          <button 
-            onClick={clearMask}
+            onMouseDown={handleDrawStart}
+            onMouseMove={handleDrawMove}
+            onMouseUp={handleDrawEnd}
+            onTouchStart={handleDrawStart}
+            onTouchMove={handleDrawMove}
+            onTouchEnd={handleDrawEnd}
+          />
+        )}
+        
+        {/* Images */}
+        {images.map(image => (
+          <div
+            key={image.id}
+            className={`draggable-image ${selectedImageId === image.id ? 'selected-image' : ''}`}
             style={{
-              padding: '5px 10px',
-              background: '#4d79ff',
-              border: 'none',
-              borderRadius: '3px',
-              color: 'white',
-              cursor: 'pointer'
+              left: `${image.position.x}px`,
+              top: `${image.position.y}px`,
+              width: `${image.width}px`,
+              height: `${image.height}px`,
+              zIndex: image.zIndex || 1,
+              clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none',
+              outline: selectedImageId === image.id ? '2px dashed yellow' : 'none',
+              position: 'absolute'
             }}
+            onMouseDown={(e) => handleDragStart(e, image.id)}
+            onContextMenu={(e) => handleContextMenu(e, image.id)}
           >
-            Clear Mask
-          </button>
-          {isDrawingMode && (
-            <div style={{ marginTop: '10px', fontSize: '12px' }}>
-              Draw a shape around the area you want to keep. Press ESC to cancel.
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Images */}
-      {images.map(image => (
-        <div
-          key={image.id}
-          className={`draggable-image ${selectedImageId === image.id ? 'selected-image' : ''}`}
-          style={{
-            left: `${image.position.x}px`,
-            top: `${image.position.y}px`,
-            width: `${image.width}px`,
-            height: `${image.height}px`,
-            zIndex: image.zIndex || 1,
-            clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none',
-            outline: selectedImageId === image.id ? '2px dashed yellow' : 'none',
-            position: 'absolute'
-          }}
-          onMouseDown={(e) => handleDragStart(e, image.id)}
-          onContextMenu={(e) => handleContextMenu(e, image.id)}
-        >
-          <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
-            {shiftPressed ? (
-              <div className="image-metadata" style={{
-                border: `2px solid ${borderColor}`,
-                width: '100%',
-                height: '100%',
-                boxSizing: 'border-box',
-                position: 'relative',
-                padding: '10px',
-                overflow: 'hidden'
-              }}>
-                <div 
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    fontSize: '1.5em',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {image.triggerKey}
-                </div>
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                  &quot;{image.parentTitle}&quot;
-                </h3>
-                <a 
-                  href={image.newsItemUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{ 
-                    color: `${borderColor}`, 
-                    textDecoration: 'underline', 
-                    fontSize: '0.8em',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block'
-                  }}
-                >
-                  {image.newsItemUrl}
-                </a>
-                <div 
-                  className="resize-handle"
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    width: '15px',
-                    height: '15px',
-                    background: 'rgba(255,255,255,0.5)',
-                    cursor: 'nwse-resize',
-                    zIndex: 10
-                  }}
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    handleResizeStart(e, image.id);
-                  }}
-                />
-              </div>
-            ) : (
-              <img 
-                src={image.src} 
-                alt={image.parentTitle}
-                title={`Source: ${image.newsItemUrl}`}
-                className="generated-image"
-                style={{
+            <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
+              {shiftPressed ? (
+                <div className="image-metadata" style={{
+                  border: `2px solid ${borderColor}`,
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover'
+                  boxSizing: 'border-box',
+                  position: 'relative',
+                  padding: '10px',
+                  overflow: 'hidden'
+                }}>
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      fontSize: '1.5em',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {image.triggerKey}
+                  </div>
+                  <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
+                    &quot;{image.parentTitle}&quot;
+                  </h3>
+                  <a 
+                    href={image.newsItemUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ 
+                      color: `${borderColor}`, 
+                      textDecoration: 'underline', 
+                      fontSize: '0.8em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      display: 'block'
+                    }}
+                  >
+                    {image.newsItemUrl}
+                  </a>
+                  <div 
+                    className="resize-handle"
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: '15px',
+                      height: '15px',
+                      background: 'rgba(255,255,255,0.5)',
+                      cursor: 'nwse-resize',
+                      zIndex: 10
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      handleResizeStart(e, image.id);
+                    }}
+                  />
+                </div>
+              ) : (
+                <img 
+                  src={image.src} 
+                  alt={image.parentTitle}
+                  title={`Source: ${image.newsItemUrl}`}
+                  className="generated-image"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  draggable="false"
+                  onDragStart={preventDragHandler}
+                  onError={(e) => {
+                    console.error('Image failed to load', e);
+                  }}
+                />
+              )}
+              <div 
+                className="resize-handle"
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  width: '15px',
+                  height: '15px',
+                  background: 'rgba(255,255,255,0.5)',
+                  cursor: 'nwse-resize',
+                  zIndex: 10,
+                  display: shiftPressed ? 'none' : 'block'
                 }}
-                draggable="false"
-                onDragStart={preventDragHandler}
-                onError={(e) => {
-                  console.error('Image failed to load', e);
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  handleResizeStart(e, image.id);
                 }}
               />
-            )}
-            <div 
-              className="resize-handle"
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: '15px',
-                height: '15px',
-                background: 'rgba(255,255,255,0.5)',
-                cursor: 'nwse-resize',
-                zIndex: 10,
-                display: shiftPressed ? 'none' : 'block'
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                handleResizeStart(e, image.id);
-              }}
-            />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      
+      {/* Control sidebar */}
+
+
+      <div className="controls-sidebar exclude-from-capture" style={{
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  zIndex: 9999,
+  padding: '15px',
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '20px'
+}}>
+  {/* Color control using hidden input */}
+  <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <label style={{ cursor: 'pointer', width: '40px', height: '40px' }} title="Pick Background Color">
+      <BucketIcon style={{ width: '100%', height: '100%', fill: currentTextColor }} />
+
+      <input
+        type="color"
+        value={currentColor}
+        onChange={handleColorChange}
+        style={{
+          position: 'absolute',
+          opacity: 0,
+          width: '0.1px',
+          height: '0.1px',
+          overflow: 'hidden',
+          pointerEvents: 'none'
+        }}
+      />
+    </label>
+  </div>
+
+  {/* Mask controls */}
+  <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
+    <button 
+      onClick={() => setIsDrawingMode(true)}
+      disabled={!selectedImageId || isDrawingMode}
+      style={{
+        width: '40px',
+        height: '40px',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
+        opacity: selectedImageId && !isDrawingMode ? 1 : 0.5
+      }}
+      title="Draw Mask"
+    >
+     <span style={{ color: currentTextColor }}>
+    <ScissorsIcon style={{ width: '100%', height: '100%' }} />
+  </span>
+    </button>
+
+    <button 
+      onClick={clearMask}
+      disabled={!selectedImageId}
+      style={{
+        width: '40px',
+        height: '40px',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: selectedImageId ? 'pointer' : 'default',
+        opacity: selectedImageId ? 1 : 0.5
+      }}
+      title="Clear Mask"
+    >
+        <span style={{ color: currentTextColor }}>
+    <ResetIcon style={{ width: '100%', height: '100%' }} />
+  </span>
+    </button>     
+
+  </div>
+</div>
     </div>
   );
 };
 
 // PropTypes validation
 ImageGenerator.propTypes = {
-  imageData: PropTypes.arrayOf(
-    PropTypes.shape({
-      newsItemPicture: PropTypes.string.isRequired,
-      parentTitle: PropTypes.string.isRequired,
-      newsItemUrl: PropTypes.string.isRequired,
-      key: PropTypes.string
-    })
-  ).isRequired,
+  imageData: PropTypes.array.isRequired,
   borderColor: PropTypes.string,
-  onSendBang: PropTypes.func
+  onSendBang: PropTypes.func,
+  onColorChange: PropTypes.func.isRequired,
+  currentColor: PropTypes.string.isRequired,
+  currentTextColor: PropTypes.string
 };
 
 export default ImageGenerator;

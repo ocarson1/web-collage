@@ -15,8 +15,6 @@ import { io } from "socket.io-client"
 
 
 function App() {
-
-
   const socketRef = useRef(null);
 
   // Initialize socket once when component mounts
@@ -44,16 +42,6 @@ function App() {
       console.error("Socket not connected");
     }
   }
-// socket.on("bang", () => {
-//    document.getElementById("recieveBang").style.background="green";
-//    setTimeout( () => document.getElementById("recieveBang").style.background="", 100);
-// });
-
-// document.querySelector("#sendBang").onclick = () => {
-//   socket.emit("bang");
-// };
-
-
 
   const [imageUrls, setImageUrls] = useState([]);
   const [color, setColor] = useState(null);
@@ -63,7 +51,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
-
 
   //Gallery functionality
   const [galImages, setGalImages] = useState([]);
@@ -162,9 +149,7 @@ function App() {
     domtoimage
       .toBlob(node, {
         bgcolor: color
-      }
-
-      )
+      })
       .then(async (blob) => {  // Note the async here
         // Save the Blob as a file
         saveAs(blob, "captured-content.png");
@@ -195,10 +180,7 @@ function App() {
         
           return true;
         }
-      
-      }
-
-      )
+      })
       .then(async (blob) => {  // Note the async here
         // Save the Blob as a file
 
@@ -213,10 +195,6 @@ function App() {
         formDataToSubmit.append('description', 'Submitted from ' + formData.description);
 
         console.log('form data', formData)
-        // const formData = new FormData();
-        // formData.append('image', blob, 'captured-content.png'); // Added filename
-        // formData.append('title', "Image");
-        // formData.append('description', "Description");
 
         try {
           // Await the fetch
@@ -254,14 +232,14 @@ function App() {
     }).replace(/\//g, '.');
   }
 
-
-  const handleColorChange = (event) => {
-    const selectedColor = event.target.value;
-    setColor(selectedColor);
-    setTextColor(getAccessibleTextColor(selectedColor))
-    // Change the entire HTML background color
-    document.documentElement.style.backgroundColor = selectedColor;
-    document.body.style.backgroundColor = selectedColor;
+  // Function to handle color updates from ImageGenerator
+  const handleColorUpdate = (newColor, newTextColor) => {
+    setColor(newColor);
+    setTextColor(newTextColor);
+    
+    // Update document colors
+    document.documentElement.style.backgroundColor = newColor;
+    document.body.style.backgroundColor = newColor;
   };
 
   // UseEffect to handle the fetch operation
@@ -269,33 +247,12 @@ function App() {
     setDate(new Date())
     fetchTrends();
     fetchGallery();
-    const initialColor = `#f0f0f0`; // e.g., '#ffffff' or 'blue'
-    // Random Color
-    // // `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+    const initialColor = `#f0f0f0`;
     setColor(initialColor);
-    setTextColor(getAccessibleTextColor(initialColor));
+    setTextColor("#000000"); // assuming black text for light gray background
     document.documentElement.style.backgroundColor = initialColor;
     document.body.style.backgroundColor = initialColor;
-
-
   }, []); // Empty dependency array means this runs once on component mount
-
-
-
-  const getAccessibleTextColor = (hexColor) => {
-    // Your existing color calculation logic
-    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
-    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
-    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
-
-    const [rLin, gLin, bLin] = [r, g, b].map((c) =>
-      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-    );
-
-    const luminance = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
-
-    return luminance > 0.179 ? "#000000" : "#ffffff";
-  };
 
   // Render loading or error states
   const renderContent = () => {
@@ -333,7 +290,14 @@ function App() {
       <div className="interface-wrapper">
         <div className="image-generator-section" style={{ borderColor: textColor }}>
           <div className="image-generator-wrapper" ref={captureRef}>
-            <ImageGenerator imageData={imageUrls} borderColor={textColor} onSendBang={sendBang} />
+            <ImageGenerator 
+              imageData={imageUrls} 
+              borderColor={textColor} 
+              onSendBang={sendBang} 
+              onColorChange={handleColorUpdate}
+              currentColor={color}
+              currentTextColor={textColor}
+            />
           </div>
         </div>
         <div className="options">
@@ -341,57 +305,33 @@ function App() {
           <div className="buttons">
             <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
             <button className="button-download" onClick={handleDownload}>
-              <img src={downloadIcon}></img>
+              <img src={downloadIcon} alt="Download" />
             </button>
           </div>
-
-
-
-
         </div>
       </div>
-
     );
   };
 
   return (
     <div className="app-container" style={{ background: color, color: textColor }}>
       <Analytics />
-      {/* <input id="recieveBang" className="bang" type="button" value="recieve bang"></input>
-      <input id="sendBang" className="bang" type="button" value="send bang" onClick={sendBang} ></input> */}
       
-  
       {/* Desktop-only content */}
       {!isMobile && (
         <>
           <div className="top-wrapper">
-            {/* <h1 style={{ color: 'grey' }}>webcollage.xyz</h1> */}
-            {/* <hr style={{ borderColor: textColor }}></hr> */}
             <br></br>
             {renderContent()}
           </div>
 
           <div className="content-section">
-
             <div className="grid-container">
               <div style={{ lineHeight: "1.25" }}>
                 <Instructions color={textColor} />
               </div>
               <div>
-
-                <div className="color-controls">
-                 {/* <img className="paint-icon" src={paintIcon}></img> */}
-                 <div>Background Color:</div>
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={handleColorChange}
-                    style={{
-                      cursor: "pointer",
-                      verticalAlign: "text-top",
-                    }}
-                  ></input>
-                </div>
+                {/* Color controls moved to ImageGenerator */}
               </div>
               <div>
               </div>
