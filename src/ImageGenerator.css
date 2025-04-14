@@ -27,7 +27,7 @@
   position: absolute;
   cursor: grab;
   user-select: none;
-  resize: both;
+  /* resize: both; */
   overflow: hidden;
   border: 1px solid transparent;
 }

@@ -15,6 +15,8 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   const [images, setImages] = useState([]);
   const [draggedImage, setDraggedImage] = useState(null);
   const [resizingImage, setResizingImage] = useState(null);
+  const [justResized, setJustResized] = useState(false);
+
   const [maxZIndex, setMaxZIndex] = useState(1);
   const [shiftPressed, setShiftPressed] = useState(false);
   
@@ -186,7 +188,13 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
 
   // Click event handler for creating new images
   const handleContainerClick = (e) => {
+    console.log('container click')
     if (isDrawingMode) return; // Ignore regular clicks in drawing mode
+    
+    if (justResized) {
+      console.log("NONO")
+      return;
+    }
     
     // Check if the click is directly on the container element itself (not child elements)
     if (e.target.classList.contains('image-generator-container')) {
@@ -195,6 +203,8 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
       // Create a new image at the click position
       const position = getRandomPosition(e.clientX, e.clientY);
       createNewImage(position);
+      setSelectedImageId(null)
+
     }
   };
 
@@ -288,7 +298,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     if (isDrawingMode) return; // Disable dragging in drawing mode
     
     if (e.shiftKey) return;
-    if (e.target.classList.contains('draggable-image')) {
+    if (e.target.classList.contains('resize-handle')) {
       console.log("resize handle clicked");
       return;
     }
@@ -363,20 +373,23 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
       setImages(prev =>
         prev.map(img => {
           if (img.id === resizingImage.id) {
+            // Calculate new width based on mouse movement
             const newWidth = Math.max(50, resizingImage.startWidth + (e.clientX - resizingImage.startX));
-            const newHeight = Math.max(50, resizingImage.startHeight + (e.clientY - resizingImage.startY));
+            
+            // Calculate new height while preserving aspect ratio
+            const aspectRatio = img.originalWidth / img.originalHeight;
+            const newHeight = Math.max(50, newWidth / aspectRatio);
             
             // Scale mask if exists
             let scaledMaskPath = null;
             if (img.originalMaskPath) {
-              // Calculate scale factors
-              const scaleX = newWidth / img.originalWidth;
-              const scaleY = newHeight / img.originalHeight;
+              // Calculate scale factors (now they should be proportional)
+              const scale = newWidth / img.originalWidth;
               
               // Scale the path by applying the transformation matrix
-              scaledMaskPath = scaleSvgPath(img.originalMaskPath, scaleX, scaleY);
+              scaledMaskPath = scaleSvgPath(img.originalMaskPath, scale, scale);
             }
-  
+    
             return {
               ...img,
               width: newWidth,
@@ -391,6 +404,27 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   }, [draggedImage, resizingImage, isDrawingMode]);
   
   const handleDragEnd = useCallback(() => {
+    console.log('its ending');
+    console.log(resizingImage);
+
+    if (resizingImage) {
+      console.log("butsdcs")
+    }
+
+ 
+   
+      console.log("SDFSDFSDF");
+      setResizingImage(null);
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        console.log('200ms?')
+        setJustResized(false);
+      }, 200); // 200ms should be enough to prevent the click
+
+
+    
+
     setDraggedImage(null);
     setResizingImage(null);
   }, []);
@@ -400,32 +434,120 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     if (isDrawingMode) return; // Disable resizing in drawing mode
     
     console.log("resize starting");
-    e.preventDefault();
-    e.stopPropagation();
-    const image = images.find(img => img.id === imageId);
   
-    setResizingImage({
+    const image = images.find(img => img.id === imageId);
+    
+    // Create the new resizing state object
+    const newResizingState = {
       id: imageId,
       startX: e.clientX,
       startY: e.clientY,
       startWidth: image.width,
       startHeight: image.height
-    });
+    };
+  
+    // Update the state
+    setResizingImage(newResizingState);
+    setJustResized(true);
+    
+    // Log the new state object directly (not from state yet)
+    console.log("New resizing state:", newResizingState);
   };
 
-  // Function to scale SVG path
   const scaleSvgPath = (pathData, scaleX, scaleY) => {
     if (!pathData) return null;
     
-    // Regular expression to extract coordinates from SVG path
-    const regex = /([ML])(\d+\.?\d*),(\d+\.?\d*)/g;
+    // Split the path data into commands and coordinates
+    const pathParts = pathData.match(/([MLHVCSQTAZ])([^MLHVCSQTAZ]*)/g) || [];
     
-    // Replace coordinates with scaled versions
-    return pathData.replace(regex, (match, command, x, y) => {
-      const scaledX = parseFloat(x) * scaleX;
-      const scaledY = parseFloat(y) * scaleY;
-      return `${command}${scaledX},${scaledY}`;
-    });
+    // Process each command separately
+    return pathParts.map(part => {
+      const command = part.charAt(0);
+      const params = part.substring(1).trim();
+      
+      // Different handling based on command type
+      switch (command) {
+        case 'M': // Move to
+        case 'L': // Line to
+        case 'C': // Cubic bezier
+        case 'S': // Smooth cubic bezier
+        case 'Q': // Quadratic bezier
+        case 'T': // Smooth quadratic bezier
+          // These commands use x,y coordinate pairs
+          return command + scaleCoordinatePairs(params, scaleX, scaleY);
+          
+        case 'H': // Horizontal line
+          // Only scale x coordinates
+          return command + scaleValues(params, scaleX);
+          
+        case 'V': // Vertical line
+          // Only scale y coordinates
+          return command + scaleValues(params, scaleY);
+          
+        case 'A': // Arc
+          // Special handling for arc parameters
+          return command + scaleArcParams(params, scaleX, scaleY);
+          
+        case 'Z': // Close path
+          // No parameters to scale
+          return command;
+          
+        default:
+          return part;
+      }
+    }).join('');
+  };
+  
+  // Helper function to scale coordinate pairs (x,y x,y ...)
+  const scaleCoordinatePairs = (paramsStr, scaleX, scaleY) => {
+    // Split by any whitespace or comma
+    const pairs = paramsStr.trim().split(/[\s,]+/);
+    const result = [];
+    
+    // Process pairs of values (x,y)
+    for (let i = 0; i < pairs.length; i += 2) {
+      if (i + 1 < pairs.length) {
+        const x = parseFloat(pairs[i]) * scaleX;
+        const y = parseFloat(pairs[i + 1]) * scaleY;
+        result.push(`${x},${y}`);
+      }
+    }
+    
+    return result.join(' ');
+  };
+  
+  // Helper function to scale a list of single values
+  const scaleValues = (paramsStr, scale) => {
+    const values = paramsStr.trim().split(/[\s,]+/);
+    return values.map(val => parseFloat(val) * scale).join(' ');
+  };
+  
+  // Helper function to scale arc parameters
+  const scaleArcParams = (paramsStr, scaleX, scaleY) => {
+    // Arc format: rx ry x-axis-rotation large-arc-flag sweep-flag x y
+    const params = paramsStr.trim().split(/[\s,]+/);
+    const result = [];
+    
+    for (let i = 0; i < params.length; i += 7) {
+      if (i + 6 < params.length) {
+        // Scale rx, ry
+        const rx = parseFloat(params[i]) * scaleX;
+        const ry = parseFloat(params[i + 1]) * scaleY;
+        
+        // Keep rotation and flags as they are
+        const xAxisRotation = params[i + 2];
+        const largeArcFlag = params[i + 3];
+        const sweepFlag = params[i + 4];
+        
+        // Scale end point coordinates
+        const x = parseFloat(params[i + 5]) * scaleX;
+        const y = parseFloat(params[i + 6]) * scaleY;
+        
+        result.push(`${rx} ${ry} ${xAxisRotation} ${largeArcFlag} ${sweepFlag} ${x},${y}`);
+      }
+    }
+    
+    return result.join(' ');
   };
 
   const IconWithBackground = ({ children }) => (
@@ -766,7 +888,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
             
             {/* Resize handle outside of masked content */}
             <div 
-              className="resize-handle"
+              className="resize-handle exclude-from-capture"
               style={{
                 position: 'absolute',
                 bottom: 0,
@@ -774,11 +896,14 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
                 width: '15px',
                 height: '15px',
                 background: 'rgba(255,255,255,0.5)',
+             
                 cursor: 'nwse-resize',
-                zIndex: 10
+                zIndex: 9999999
               }}
               onMouseDown={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // <--- THIS IS THE FIX
+
+                console.log("resiziiziz")
                 handleResizeStart(e, image.id);
               }}
             />
