@@ -1,14 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './ImageGenerator.css';
-
-import { ReactComponent as BucketIcon } from './components/bucket.svg';
-import { ReactComponent as ScissorsIcon } from './components/scissors.svg';
-import { ReactComponent as ResetIcon } from './components/reset.svg';
-
-
-// import trash from './components/trash.svg';
-
+import ImageItem from './components/ImageItem';
+import ControlsSidebar from './components/ControlsSidebar';
+import { scaleSvgPath } from './utils/MaskingTools';
 
 const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgColor}) => {
   // State declarations
@@ -16,7 +11,6 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   const [draggedImage, setDraggedImage] = useState(null);
   const [resizingImage, setResizingImage] = useState(null);
   const [justResized, setJustResized] = useState(false);
-
   const [maxZIndex, setMaxZIndex] = useState(1);
   const [shiftPressed, setShiftPressed] = useState(false);
   
@@ -25,7 +19,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [currentPath, setCurrentPath] = useState([]);
   const canvasRef = useRef(null);
- 
+
   // Keyboard event handlers
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -75,6 +69,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     }
   }, [isDrawingMode]);
 
+  // Get accessible text color based on background
   const getAccessibleTextColor = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16) / 255;
     const g = parseInt(hexColor.slice(3, 5), 16) / 255;
@@ -140,6 +135,11 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     });
   };
   
+  const normalizeSvgPath = (pathData, width, height) => {
+    // Scale the path so that it fits in a 1×1 coordinate space
+    return scaleSvgPath(pathData, 1/width, 1/height);
+  };
+  
   // Image creation
   const createNewImage = async (position) => {
     const randomIndex = Math.floor(Math.random() * imageData.length);
@@ -188,23 +188,18 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
 
   // Click event handler for creating new images
   const handleContainerClick = (e) => {
-    console.log('container click')
     if (isDrawingMode) return; // Ignore regular clicks in drawing mode
     
     if (justResized) {
-      console.log("NONO")
       return;
     }
     
     // Check if the click is directly on the container element itself (not child elements)
     if (e.target.classList.contains('image-generator-container')) {
-      console.log("Click detected on container");
-      
       // Create a new image at the click position
       const position = getRandomPosition(e.clientX, e.clientY);
       createNewImage(position);
-      setSelectedImageId(null)
-
+      setSelectedImageId(null);
     }
   };
 
@@ -274,12 +269,12 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
           newsItemUrl: imageData[index].newsItemUrl,
           width: 400, // Fallback width
           height: 200, // Fallback height
-          originalWidth: 400, // Store original dimensions for mask scaling
+          originalWidth: 400,
           originalHeight: 200,
           zIndex: newMaxZIndex,
           triggerKey: key,
-          maskPath: null, // Initialize with no mask
-          originalMaskPath: null // Store original mask path
+          maskPath: null,
+          originalMaskPath: null
         };
 
         setImages(prev => [...prev, newImage]);
@@ -299,27 +294,16 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     
     if (e.shiftKey) return;
     if (e.target.classList.contains('resize-handle')) {
-      console.log("resize handle clicked");
       return;
     }
-    console.log("drag starting");
   
-    const container = document.querySelector('.image-generator-container');
-    const containerRect = container.getBoundingClientRect();
+    // const container = document.querySelector('.image-generator-container');
+    // const containerRect = container.getBoundingClientRect();
     const boundingRect = e.target.getBoundingClientRect();
     
     // Calculate the initial offset from the mouse to the top-left corner of the image
     const offsetX = e.clientX - boundingRect.left;
     const offsetY = e.clientY - boundingRect.top;
-  
-    console.log('Drag Start Debugging:', {
-      containerRect,
-      boundingRect,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      offsetX,
-      offsetY
-    });
     
     const newMaxZIndex = maxZIndex + 1;
     setMaxZIndex(newMaxZIndex);
@@ -368,215 +352,123 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
       );
     }
   
-    // Handle image resizing
-    if (resizingImage) {
-      setImages(prev =>
+  // Handle image resizing
+  if (resizingImage) {
+    setImages(prev =>
+      prev.map(img => {
+        if (img.id === resizingImage.id) {
+          // Calculate new width based on mouse movement
+          const deltaX = e.clientX - resizingImage.startX;
+          const newWidth = Math.max(50, resizingImage.startWidth + deltaX);
+          
+          // Calculate new height while preserving aspect ratio
+          const aspectRatio = img.originalWidth / img.originalHeight;
+          const newHeight = Math.max(50, newWidth / aspectRatio);
+          
+          // Scale mask if exists
+          let scaledMaskPath = null;
+          if (img.normalizedMaskPath) {
+            // Use the normalized path and scale it to the current dimensions
+            scaledMaskPath = scaleSvgPath(img.normalizedMaskPath, newWidth, newHeight);
+          } else if (img.originalMaskPath) {
+            // If normalized path doesn't exist (for backward compatibility)
+            // Create a normalized path on-the-fly
+            const normalizedPath = normalizeSvgPath(
+              img.originalMaskPath, 
+              img.maskOriginalWidth || img.originalWidth, 
+              img.maskOriginalHeight || img.originalHeight
+            );
+            
+            // Then scale to current dimensions
+            scaledMaskPath = scaleSvgPath(normalizedPath, newWidth, newHeight);
+          }
+  
+          return {
+            ...img,
+            width: newWidth,
+            height: newHeight,
+            maskPath: scaledMaskPath
+          };
+        }
+        return img;
+      })
+    );
+  }
+}, [draggedImage, resizingImage, isDrawingMode]);
+// In handleResizeEnd, make sure we're not storing any intermediate scaled paths
+const handleResizeEnd = useCallback(() => {
+  if (resizingImage) {
+    // Get the current image that was being resized
+    const resizedImage = images.find(img => img.id === resizingImage.id);
+    
+    if (resizedImage) {
+      console.log("Resize completed:", {
+        imageId: resizedImage.id,
+        finalWidth: resizedImage.width,
+        finalHeight: resizedImage.height,
+        scaleFromOriginal: resizedImage.width / resizedImage.originalWidth
+      });
+      
+      // No need to store cachedScaledMaskPath, just dimensions
+      setImages(prev => 
         prev.map(img => {
           if (img.id === resizingImage.id) {
-            // Calculate new width based on mouse movement
-            const newWidth = Math.max(50, resizingImage.startWidth + (e.clientX - resizingImage.startX));
-            
-            // Calculate new height while preserving aspect ratio
-            const aspectRatio = img.originalWidth / img.originalHeight;
-            const newHeight = Math.max(50, newWidth / aspectRatio);
-            
-            // Scale mask if exists
-            let scaledMaskPath = null;
-            if (img.originalMaskPath) {
-              // Calculate scale factors (now they should be proportional)
-              const scale = newWidth / img.originalWidth;
-              
-              // Scale the path by applying the transformation matrix
-              scaledMaskPath = scaleSvgPath(img.originalMaskPath, scale, scale);
-            }
-    
             return {
               ...img,
-              width: newWidth,
-              height: newHeight,
-              maskPath: scaledMaskPath
+              lastResizedWidth: img.width,
+              lastResizedHeight: img.height
             };
           }
           return img;
         })
       );
     }
-  }, [draggedImage, resizingImage, isDrawingMode]);
-  
-  const handleDragEnd = useCallback(() => {
-    console.log('its ending');
-    console.log(resizingImage);
-
-    if (resizingImage) {
-      console.log("butsdcs")
-    }
-
- 
-   
-      console.log("SDFSDFSDF");
-      setResizingImage(null);
-      
-      // Reset the flag after a short delay
-      setTimeout(() => {
-        console.log('200ms?')
-        setJustResized(false);
-      }, 200); // 200ms should be enough to prevent the click
-
-
     
-
-    setDraggedImage(null);
     setResizingImage(null);
-  }, []);
-
-  // Resize handlers
-  const handleResizeStart = (e, imageId) => {
-    if (isDrawingMode) return; // Disable resizing in drawing mode
     
-    console.log("resize starting");
+    setTimeout(() => {
+      setJustResized(false);
+    }, 200);
+  }
+}, [resizingImage, images]);
+const handleDragEnd = useCallback(() => {
+  setDraggedImage(null);
   
-    const image = images.find(img => img.id === imageId);
-    
-    // Create the new resizing state object
-    const newResizingState = {
-      id: imageId,
-      startX: e.clientX,
-      startY: e.clientY,
-      startWidth: image.width,
-      startHeight: image.height
-    };
+  if (resizingImage) {
+    handleResizeEnd();
+  }
+}, [resizingImage, handleResizeEnd]);
+// Improved handleResizeStart to capture the exact latest dimensions
+const handleResizeStart = (e, imageId) => {
+  if (isDrawingMode) return;
   
-    // Update the state
-    setResizingImage(newResizingState);
-    setJustResized(true);
-    
-    // Log the new state object directly (not from state yet)
-    console.log("New resizing state:", newResizingState);
-  };
-
-  const scaleSvgPath = (pathData, scaleX, scaleY) => {
-    if (!pathData) return null;
-    
-    // Split the path data into commands and coordinates
-    const pathParts = pathData.match(/([MLHVCSQTAZ])([^MLHVCSQTAZ]*)/g) || [];
-    
-    // Process each command separately
-    return pathParts.map(part => {
-      const command = part.charAt(0);
-      const params = part.substring(1).trim();
-      
-      // Different handling based on command type
-      switch (command) {
-        case 'M': // Move to
-        case 'L': // Line to
-        case 'C': // Cubic bezier
-        case 'S': // Smooth cubic bezier
-        case 'Q': // Quadratic bezier
-        case 'T': // Smooth quadratic bezier
-          // These commands use x,y coordinate pairs
-          return command + scaleCoordinatePairs(params, scaleX, scaleY);
-          
-        case 'H': // Horizontal line
-          // Only scale x coordinates
-          return command + scaleValues(params, scaleX);
-          
-        case 'V': // Vertical line
-          // Only scale y coordinates
-          return command + scaleValues(params, scaleY);
-          
-        case 'A': // Arc
-          // Special handling for arc parameters
-          return command + scaleArcParams(params, scaleX, scaleY);
-          
-        case 'Z': // Close path
-          // No parameters to scale
-          return command;
-          
-        default:
-          return part;
-      }
-    }).join('');
-  };
+  // Get direct reference to the DOM element for immediate measurements
+  const imgElement = document.querySelector(`[data-image-id="${imageId}"]`);
+  const image = images.find(img => img.id === imageId);
   
-  // Helper function to scale coordinate pairs (x,y x,y ...)
-  const scaleCoordinatePairs = (paramsStr, scaleX, scaleY) => {
-    // Split by any whitespace or comma
-    const pairs = paramsStr.trim().split(/[\s,]+/);
-    const result = [];
-    
-    // Process pairs of values (x,y)
-    for (let i = 0; i < pairs.length; i += 2) {
-      if (i + 1 < pairs.length) {
-        const x = parseFloat(pairs[i]) * scaleX;
-        const y = parseFloat(pairs[i + 1]) * scaleY;
-        result.push(`${x},${y}`);
-      }
-    }
-    
-    return result.join(' ');
-  };
+  if (!image) return;
   
-  // Helper function to scale a list of single values
-  const scaleValues = (paramsStr, scale) => {
-    const values = paramsStr.trim().split(/[\s,]+/);
-    return values.map(val => parseFloat(val) * scale).join(' ');
-  };
+  // Get the most accurate current dimensions
+  // Use DOM element dimensions if available, otherwise fall back to state
+  const currentWidth = imgElement ? imgElement.offsetWidth : image.width;
+  const currentHeight = imgElement ? imgElement.offsetHeight : image.height;
   
-  // Helper function to scale arc parameters
-  const scaleArcParams = (paramsStr, scaleX, scaleY) => {
-    // Arc format: rx ry x-axis-rotation large-arc-flag sweep-flag x y
-    const params = paramsStr.trim().split(/[\s,]+/);
-    const result = [];
-    
-    for (let i = 0; i < params.length; i += 7) {
-      if (i + 6 < params.length) {
-        // Scale rx, ry
-        const rx = parseFloat(params[i]) * scaleX;
-        const ry = parseFloat(params[i + 1]) * scaleY;
-        
-        // Keep rotation and flags as they are
-        const xAxisRotation = params[i + 2];
-        const largeArcFlag = params[i + 3];
-        const sweepFlag = params[i + 4];
-        
-        // Scale end point coordinates
-        const x = parseFloat(params[i + 5]) * scaleX;
-        const y = parseFloat(params[i + 6]) * scaleY;
-        
-        result.push(`${rx} ${ry} ${xAxisRotation} ${largeArcFlag} ${sweepFlag} ${x},${y}`);
-      }
-    }
-    
-    return result.join(' ');
+  console.log("Starting resize with dimensions:", {
+    fromState: { width: image.width, height: image.height },
+    fromDOM: { width: currentWidth, height: currentHeight }
+  });
+  
+  const newResizingState = {
+    id: imageId,
+    startX: e.clientX,
+    startY: e.clientY,
+    startWidth: currentWidth,  // Use the most current width
+    startHeight: currentHeight // Use the most current height
   };
 
-  const IconWithBackground = ({ children }) => (
-    <span style={{ 
-      color: 'black',
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-      borderRadius: '50%',
-      padding: '6px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '40px',
-      height: '40px'
-    }}>
-      {children}
-    </span>
-  );
-
-  // Add PropTypes validation
-  IconWithBackground.propTypes = {
-    children: PropTypes.node.isRequired,
-    color: PropTypes.string
-  };
-
-  // You can also add default props if needed
-  IconWithBackground.defaultProps = {
-    color: 'currentColor'
-  };
-
+  setResizingImage(newResizingState);
+  setJustResized(true);
+};
   // Context menu handler (right-click)
   const handleContextMenu = (e, imageId) => {
     e.preventDefault(); // Prevent default context menu
@@ -588,6 +480,8 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     }
   };
   
+
+
   // Drawing handlers for mask creation
   const getPointFromEvent = (e) => {
     const canvas = canvasRef.current;
@@ -669,6 +563,8 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   };
   
   const handleDrawMove = (e) => {
+
+    
     if (!isDrawingMode || !selectedImageId || currentPath.length === 0) return;
     
     e.preventDefault();
@@ -698,17 +594,26 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     
     // Convert points to SVG path string
     const svgPath = pointsToSvgPath(closedPath);
+
+    // Helper function to normalize SVG path to a 1×1 coordinate space
+
     
     // Apply to selected image
     setImages(prev => prev.map(img => 
       img.id === selectedImageId 
         ? { 
-            ...img, 
-            maskPath: svgPath,
-            originalMaskPath: svgPath // Store original for scaling
+          ...img,
+          originalMaskPath: svgPath,                // Original unscaled mask path
+          maskPath: svgPath,                        // Current displayed mask path
+          maskOriginalWidth: img.width,              // Width when mask was applied
+          maskOriginalHeight: img.height,            // Height when mask was applied
+          // Store normalized mask path (relative to 1×1 coordinate space)
+          normalizedMaskPath: normalizeSvgPath(svgPath, img.width, img.height)
           }
         : img
     ));
+
+    
     
     // Clear drawing state
     setCurrentPath([]);
@@ -798,230 +703,30 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
         
         {/* Images */}
         {images.map(image => (
-          <div
+          <ImageItem
             key={image.id}
-            className={`draggable-image ${selectedImageId === image.id ? 'selected-image' : ''}`}
-            style={{
-              left: `${image.position.x}px`,
-              top: `${image.position.y}px`,
-              width: `${image.width}px`,
-              height: `${image.height}px`,
-              zIndex: image.zIndex || 1,
-              outline: selectedImageId === image.id ? '2px dashed black' : 'none',
-              position: 'absolute'
-            }}
-            onMouseDown={(e) => handleDragStart(e, image.id)}
-            onContextMenu={(e) => handleContextMenu(e, image.id)}
-          >
-            {/* This inner div will handle the mask */}
-            <div 
-              className="image-content"
-              style={{ 
-                width: '100%', 
-                height: '100%',
-                position: 'relative',
-                clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none'
-              }}
-            >
-              <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
-                {shiftPressed ? (
-                  <div className="image-metadata" style={{
-                    border: `2px solid ${borderColor}`,
-                    width: '100%',
-                    height: '100%',
-                    boxSizing: 'border-box',
-                    position: 'relative',
-                    padding: '10px',
-                    overflow: 'hidden'
-                  }}>
-                    <div 
-                      style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        fontSize: '1.5em',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {image.triggerKey}
-                    </div>
-                    <h3 style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                      &quot;{image.parentTitle}&quot;
-                    </h3>
-                    <a 
-                      href={image.newsItemUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{ 
-                        color: `${borderColor}`, 
-                        textDecoration: 'underline', 
-                        fontSize: '0.8em',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        display: 'block'
-                      }}
-                    >
-                      {image.newsItemUrl}
-                    </a>
-                  </div>
-                ) : (
-                  <img 
-                    src={image.src} 
-                    alt={image.parentTitle}
-                    title={`Source: ${image.newsItemUrl}`}
-                    className="generated-image"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    draggable="false"
-                    onDragStart={preventDragHandler}
-                    onError={(e) => {
-                      console.error('Image failed to load', e);
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-            
-            {/* Resize handle outside of masked content */}
-            <div 
-              className="resize-handle exclude-from-capture"
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: '15px',
-                height: '15px',
-                background: 'rgba(255,255,255,0.5)',
-             
-                cursor: 'nwse-resize',
-                zIndex: 9999999
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation(); // <--- THIS IS THE FIX
-
-                console.log("resiziiziz")
-                handleResizeStart(e, image.id);
-              }}
-            />
-          </div>
+            image={image}
+            shiftPressed={shiftPressed}
+            borderColor={borderColor}
+            selectedImageId={selectedImageId}
+            isDrawingMode={isDrawingMode}
+            onDragStart={handleDragStart}
+            onResizeStart={handleResizeStart}
+            onContextMenu={handleContextMenu}
+            preventDragHandler={preventDragHandler}
+          />
         ))}
       </div>
       
       {/* Control sidebar */}
-      <div className="controls-sidebar exclude-from-capture" style={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        zIndex: 9999,
-        padding: '15px',
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '20px'
-      }}>
-        {/* Color control using hidden input */}
-        <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <label 
-            style={{ 
-              cursor: 'pointer',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              borderRadius: '50%',
-              padding: '6px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '40px',
-              height: '40px',
-              boxSizing: 'border-box'  // Added to match others
-            }} 
-            title="Pick Background Color"
-          >
-            <BucketIcon style={{ width: '24px', height: '24px', color: 'black' }} />
-            <input
-              type="color"
-              value={bgColor}
-              onChange={handleColorChange}
-              style={{
-                position: 'absolute',
-                opacity: 0,
-                width: '0.1px',
-                height: '0.1px',
-                overflow: 'hidden',
-                pointerEvents: 'none'
-              }}
-            />
-          </label>
-        </div>
-
-        {/* Mask controls */}
-        <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
-          <button 
-            onClick={() => setIsDrawingMode(true)}
-            disabled={!selectedImageId || isDrawingMode}
-            style={{
-              width: '40px',
-              height: '40px',
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
-              opacity: selectedImageId ? 1 : 0.3,
-            }}
-            title="Draw Mask"
-          >
-            <span style={{ 
-              backgroundColor: isDrawingMode ? 'black' : 'rgba(255, 255, 255, 0.7)',
-              borderRadius: '50%',
-              padding: '6px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '40px',
-              height: '40px',
-              boxSizing: 'border-box'
-            }}>
-              <ScissorsIcon style={{ 
-                width: '24px', 
-                height: '24px', 
-                color: isDrawingMode ? 'white' : 'black' 
-              }} />
-            </span>
-          </button>
-
-          <button 
-            onClick={clearMask}
-            disabled={!selectedImageId}
-            style={{
-              width: '40px',
-              height: '40px',
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: selectedImageId ? 'pointer' : 'default',
-              opacity: selectedImageId ? 1 : 0.3
-            }}
-            title="Clear Mask"
-          >
-            <span style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              borderRadius: '50%',
-              padding: '6px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-       
-              width: '40px',
-              height: '40px',
-              boxSizing: 'border-box'
-            }}>
-              <ResetIcon style={{ width: '24px', height: '24px', color: 'black' }} />
-            </span>
-          </button>
-        </div>
-      </div>
+      <ControlsSidebar 
+        bgColor={bgColor}
+        handleColorChange={handleColorChange}
+        isDrawingMode={isDrawingMode}
+        selectedImageId={selectedImageId}
+        setIsDrawingMode={setIsDrawingMode}
+        clearMask={clearMask}
+      />
     </div>
   );
 };
