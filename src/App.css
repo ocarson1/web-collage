@@ -74,7 +74,6 @@ img {
 
 
 
-  border-color: #333;
   position: relative;
   height: 100%; /* or set a specific height */
   overflow: hidden; /* Change from 'auto' to 'hidden' */

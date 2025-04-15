@@ -814,7 +814,8 @@ const handleResizeStart = (e, imageId) => {
       </div>
       
       {/* Middle: Bounded canvas area */}
-      <div className="canvas-container">
+      <div className="canvas-section">
+      <div className="canvas-container" style={{backgroundColor: bgColor}}>
         <div 
           className="image-generator-container" 
           style={{ backgroundColor: bgColor }}
@@ -871,6 +872,7 @@ const handleResizeStart = (e, imageId) => {
             />
           ))}
         </div>
+      </div>
       </div>
       
       {/* Right side: ScrollableImageMenu */}

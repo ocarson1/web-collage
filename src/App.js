@@ -232,6 +232,8 @@ function App() {
     }).replace(/\//g, '.');
   }
 
+  
+
   // Function to handle color updates from ImageGenerator
   const handleColorUpdate = (newColor, newTextColor) => {
     setColor(newColor);
