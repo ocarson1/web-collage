@@ -157,7 +157,7 @@ function App() {
   }
 
   const handleCaptureAndSave = () => {
-    const node = captureRef.current;
+    const node = document.querySelector('.canvas-container');
 
     if (!node) {
       console.error("Element to capture is not found!");
@@ -239,7 +239,7 @@ function App() {
     
     // Update document colors
     document.documentElement.style.backgroundColor = newColor;
-    document.body.style.backgroundColor = newColor;
+    document.body.style.backgroundColor = newColor
   };
 
   // UseEffect to handle the fetch operation
@@ -297,18 +297,22 @@ function App() {
               onColorChange={handleColorUpdate}
               currentColor={color}
               currentTextColor={textColor}
+         
             />
           </div>
         </div>
         <div className="options">
-          <h1>{formatDate1(date)}</h1>
+
+          {/* <h1>{formatDate1(date)}</h1> */}
           <div className="buttons">
             <button className="button-submit" onClick={handleCaptureAndSave}>Submit</button>
             <button className="button-download" onClick={handleDownload}>
               <img src={downloadIcon} alt="Download" />
             </button>
+
           </div>
         </div>
+        
       </div>
     );
   };
@@ -337,7 +341,6 @@ function App() {
               </div>
             </div>
 
-            <hr style={{ backgroundColor: textColor }}></hr>
           </div>
         </>
       )}

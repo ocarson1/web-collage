@@ -4,6 +4,129 @@ import './ImageGenerator.css';
 import ImageItem from './components/ImageItem';
 import ControlsSidebar from './components/ControlsSidebar';
 import { scaleSvgPath } from './utils/MaskingTools';
+import { formatDayDate, formatTime } from './utils/dateUtils';
+
+
+// ImageMenuItem remains mostly the same
+const ImageMenuItem = ({ image, onDragStart }) => {
+
+  
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      src: image.newsItemPicture,
+      parentTitle: image.parentTitle,
+      newsItemUrl: image.newsItemUrl,
+      triggerKey: image.key
+    }));
+
+    const ghostImage = new Image();
+    ghostImage.src = image.newsItemPicture;
+    ghostImage.style.width = '100px';
+    ghostImage.style.height = 'auto';
+    ghostImage.style.opacity = '0.7';
+    document.body.appendChild(ghostImage);
+    e.dataTransfer.setDragImage(ghostImage, 50, 50);
+
+    setTimeout(() => {
+      document.body.removeChild(ghostImage);
+    }, 0);
+
+    if (onDragStart) onDragStart(image);
+  };
+
+  return (
+    <div 
+  className="image-menu-item"
+  draggable
+  onDragStart={handleDragStart}
+  style={{
+    width: '50px',
+    height: 'auto',
+    aspectRatio: '1 / 1', // ensures square box (optional)
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'grab',
+  }}
+>
+  <img 
+    src={image.newsItemPicture} 
+    alt={image.parentTitle || 'Draggable image'} 
+    style={{
+      opacity: '0.5',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      objectFit: 'contain',
+      display: 'block',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+
+    }}
+  />
+</div>
+  );
+};
+
+ImageMenuItem.propTypes = {
+  image: PropTypes.shape({
+    newsItemPicture: PropTypes.string.isRequired,
+    parentTitle: PropTypes.string,
+    newsItemUrl: PropTypes.string,
+    key: PropTypes.string
+  }).isRequired,
+  onDragStart: PropTypes.func
+};
+
+
+// Updated container: Grid instead of scrollable menu
+const ResponsiveImageGrid = ({ imageData, onDragStart }) => {
+
+  const [date, setDate] = useState(new Date())
+
+
+  useEffect(() => {
+      setDate(new Date())
+    }, []); // Empty dependency array means this runs once on component mount
+  
+  return (
+    <div>
+    <h3>{formatDayDate(date)}</h3>
+    <h3 style={{fontWeight:'400'}}>{formatTime(date)}</h3>
+    <br></br>
+    <div 
+      className="responsive-image-grid"
+      style={{
+        width: '212px', // 3 columns * 100px + 2 gaps * 12px
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '12px',
+        justifyContent: 'flex-start'
+      }}
+    >
+
+      {imageData.map((image, index) => (
+        <ImageMenuItem 
+          key={index} 
+          image={image} 
+          onDragStart={onDragStart}
+        />
+      ))}
+    </div>
+    </div>
+  );
+};
+
+ResponsiveImageGrid.propTypes = {
+  imageData: PropTypes.arrayOf(
+    PropTypes.shape({
+      newsItemPicture: PropTypes.string.isRequired,
+      parentTitle: PropTypes.string,
+      newsItemUrl: PropTypes.string,
+      key: PropTypes.string
+    })
+  ).isRequired,
+  onDragStart: PropTypes.func
+};
 
 const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgColor}) => {
   // State declarations
@@ -139,69 +262,85 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
     // Scale the path so that it fits in a 1×1 coordinate space
     return scaleSvgPath(pathData, 1/width, 1/height);
   };
-  
-  // Image creation
-  const createNewImage = async (position) => {
-    const randomIndex = Math.floor(Math.random() * imageData.length);
-    const randomImage = imageData[randomIndex];
-  
-    if (randomImage) {
+
+  // New handler for dropping images from the menu
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    if (isDrawingMode) return;
+    
+    try {
+      // Get the JSON data from the drag event
+      const jsonData = e.dataTransfer.getData('application/json');
+      
+      if (!jsonData) return;
+      
+      const imageInfo = JSON.parse(jsonData);
+      
+      // Get the position where the image was dropped
+      const container = document.querySelector('.image-generator-container');
+      if (!container) return;
+      
+      const rect = container.getBoundingClientRect();
+      const position = {
+        x: e.clientX - rect.left - 100,  // Offset for better positioning
+        y: e.clientY - rect.top - 100
+      };
+      
+      // Get dimensions of the image
+      const dimensions = await getImageDimensions(imageInfo.src);
+      
+      // Create a new image object
       const newMaxZIndex = maxZIndex + 1;
       setMaxZIndex(newMaxZIndex);
       
-      // Get natural dimensions of the image
-      const dimensions = await getImageDimensions(randomImage.newsItemPicture);
-  
       const newImage = {
         id: Date.now(),
         position: position,
-        src: randomImage.newsItemPicture,
-        parentTitle: randomImage.parentTitle,
-        newsItemUrl: randomImage.newsItemUrl,
+        src: imageInfo.src,
+        parentTitle: imageInfo.parentTitle,
+        newsItemUrl: imageInfo.newsItemUrl,
         width: dimensions.width,
         height: dimensions.height,
-        originalWidth: dimensions.width, // Store original dimensions for mask scaling
+        originalWidth: dimensions.width,
         originalHeight: dimensions.height,
         zIndex: newMaxZIndex,
-        triggerKey: randomImage.key,
-        maskPath: null, // Initialize with no mask
-        originalMaskPath: null // Store original mask path
+        triggerKey: imageInfo.triggerKey,
+        maskPath: null,
+        originalMaskPath: null
       };
-  
+      
+      // Add the new image to the canvas
       setImages(prev => [...prev, newImage]);
+      
+      // Trigger any additional actions (e.g., sound effect)
+      if (onSendBang) onSendBang();
+    } catch (error) {
+      console.error('Error handling drop:', error);
     }
   };
   
-  // Touch event handler
-  const handleTouch = (e) => {
-    if (isDrawingMode) return; // Ignore regular touch events in drawing mode
-    if (e.target.classList.contains('draggable-image')) return;
-    
-    const touch = e.touches[0];
-    // Get the touch position relative to the viewport
-    const position = getRandomPosition(
-      touch.clientX,
-      touch.clientY
-    );
-    createNewImage(position);
+  // Allow the container to accept drops
+  const handleDragOver = (e) => {
+    e.preventDefault(); // This is necessary to allow dropping
+    if (!isDrawingMode) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
   };
-
-  // Click event handler for creating new images
+  
+  // Modified handleContainerClick to prevent adding images on click
   const handleContainerClick = (e) => {
-    if (isDrawingMode) return; // Ignore regular clicks in drawing mode
+    if (isDrawingMode) return;
     
     if (justResized) {
       return;
     }
     
-    // Check if the click is directly on the container element itself (not child elements)
+    // Only handle selection of existing images, no new image creation
     if (e.target.classList.contains('image-generator-container')) {
-      // Create a new image at the click position
-      const position = getRandomPosition(e.clientX, e.clientY);
-      createNewImage(position);
       setSelectedImageId(null);
     }
   };
+  
 
   // Keyboard event handler for image generation
   const handleKeyPress = useCallback((event) => {
@@ -638,12 +777,13 @@ const handleResizeStart = (e, imageId) => {
     ));
   };
 
-  // Global event listeners
+  // Global event listeners (modified to include drop handlers)
   useEffect(() => {
     const container = document.querySelector('.image-generator-container');
     if (container) {
-      container.addEventListener('touchstart', handleTouch);
       container.addEventListener('click', handleContainerClick);
+      container.addEventListener('dragover', handleDragOver);
+      container.addEventListener('drop', handleDrop);
     }
 
     window.addEventListener('keypress', handleKeyPress);
@@ -652,88 +792,113 @@ const handleResizeStart = (e, imageId) => {
 
     return () => {
       if (container) {
-        container.removeEventListener('touchstart', handleTouch);
         container.removeEventListener('click', handleContainerClick);
+        container.removeEventListener('dragover', handleDragOver);
+        container.removeEventListener('drop', handleDrop);
       }
       window.removeEventListener('keypress', handleKeyPress);
       window.removeEventListener('mousemove', handleDrag);
       window.removeEventListener('mouseup', handleDragEnd);
     };
-  }, [handleKeyPress, handleDrag, handleDragEnd]);
+  }, [handleKeyPress, handleDrag, handleDragEnd, handleDrop]);
 
-  // Render function
+  // Render function (modified to include the image menu)
   return (
-    <div className="image-generator-wrapper" style={{ display: 'flex', flexDirection: 'row' }}>
-      <div className="image-generator-container" style={{ position: 'relative', flex: '1' }}>
-        {/* SVG definitions for clip paths */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-          <defs>
-            {images.map(image => 
-              image.maskPath && (
-                <clipPath id={`mask-${image.id}`} key={`mask-${image.id}`}>
-                  <path d={image.maskPath} />
-                </clipPath>
-              )
-            )}
-          </defs>
-        </svg>
-        
-        {/* Drawing canvas overlay */}
-        {isDrawingMode && (
-          <canvas 
-            ref={canvasRef}
-            className="drawing-canvas"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 9999,
-              cursor: 'crosshair'
-            }}
-            onMouseDown={handleDrawStart}
-            onMouseMove={handleDrawMove}
-            onMouseUp={handleDrawEnd}
-            onTouchStart={handleDrawStart}
-            onTouchMove={handleDrawMove}
-            onTouchEnd={handleDrawEnd}
-          />
-        )}
-        
-        {/* Images */}
-        {images.map(image => (
-          <ImageItem
-            key={image.id}
-            image={image}
-            shiftPressed={shiftPressed}
-            borderColor={borderColor}
-            selectedImageId={selectedImageId}
-            isDrawingMode={isDrawingMode}
-            onDragStart={handleDragStart}
-            onResizeStart={handleResizeStart}
-            onContextMenu={handleContextMenu}
-            preventDragHandler={preventDragHandler}
-          />
-        ))}
+    <div className="app-sub-container">
+      {/* Left side: ControlsSidebar */}
+      <div className="controls-container">
+        <ResponsiveImageGrid 
+          imageData={imageData} 
+          onDragStart={() => onSendBang && onSendBang()}
+        />
       </div>
       
-      {/* Control sidebar */}
-      <ControlsSidebar 
-        bgColor={bgColor}
-        handleColorChange={handleColorChange}
-        isDrawingMode={isDrawingMode}
-        selectedImageId={selectedImageId}
-        setIsDrawingMode={setIsDrawingMode}
-        clearMask={clearMask}
-      />
+      {/* Middle: Bounded canvas area */}
+      <div className="canvas-container">
+        <div 
+          className="image-generator-container" 
+          style={{ backgroundColor: bgColor }}
+        >
+          {/* SVG definitions for clip paths */}
+          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+            <defs>
+              {images.map(image => 
+                image.maskPath && (
+                  <clipPath id={`mask-${image.id}`} key={`mask-${image.id}`}>
+                    <path d={image.maskPath} />
+                  </clipPath>
+                )
+              )}
+            </defs>
+          </svg>
+          
+          {/* Drawing canvas overlay */}
+          {isDrawingMode && (
+            <canvas 
+              ref={canvasRef}
+              className="drawing-canvas"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 9999,
+                cursor: 'crosshair'
+              }}
+              onMouseDown={handleDrawStart}
+              onMouseMove={handleDrawMove}
+              onMouseUp={handleDrawEnd}
+              onTouchStart={handleDrawStart}
+              onTouchMove={handleDrawMove}
+              onTouchEnd={handleDrawEnd}
+            />
+          )}
+          
+          {/* Images */}
+          {images.map(image => (
+            <ImageItem
+              key={image.id}
+              image={image}
+              shiftPressed={shiftPressed}
+              borderColor={borderColor}
+              selectedImageId={selectedImageId}
+              isDrawingMode={isDrawingMode}
+              onDragStart={handleDragStart}
+              onResizeStart={handleResizeStart}
+              onContextMenu={handleContextMenu}
+              preventDragHandler={preventDragHandler}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* Right side: ScrollableImageMenu */}
+      
+      <div className="controls-container">
+        <ControlsSidebar 
+          bgColor={bgColor}
+          handleColorChange={handleColorChange}
+          isDrawingMode={isDrawingMode}
+          selectedImageId={selectedImageId}
+          setIsDrawingMode={setIsDrawingMode}
+          clearMask={clearMask}
+        />
+      </div>
     </div>
   );
 };
 
 // PropTypes validation
 ImageGenerator.propTypes = {
-  imageData: PropTypes.array.isRequired,
+  imageData: PropTypes.arrayOf(
+    PropTypes.shape({
+      newsItemPicture: PropTypes.string.isRequired,
+      parentTitle: PropTypes.string,
+      newsItemUrl: PropTypes.string,
+      key: PropTypes.string
+    })
+  ).isRequired,
   borderColor: PropTypes.string,
   onSendBang: PropTypes.func,
   onColorChange: PropTypes.func.isRequired,

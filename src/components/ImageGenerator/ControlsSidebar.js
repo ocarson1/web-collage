@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ReactComponent as BucketIcon } from './bucket.svg';
-import { ReactComponent as ScissorsIcon } from './scissors.svg';
-import { ReactComponent as ResetIcon } from './reset.svg';
+import { ReactComponent as BucketIcon } from '../bucket.svg';
+import { ReactComponent as ScissorsIcon } from '../scissors.svg';
+import { ReactComponent as ResetIcon } from '../reset.svg';
 
 const ControlsSidebar = ({
   bgColor,
@@ -14,13 +14,13 @@ const ControlsSidebar = ({
 }) => {
   return (
     <div className="controls-sidebar exclude-from-capture" style={{
-      // position: 'absolute',
+      position: 'absolute',
       top: 0,
       right: 0,
       zIndex: 9999,
       padding: '15px',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'row',
       gap: '20px'
     }}>
       {/* Color control using hidden input */}
@@ -58,9 +58,10 @@ const ControlsSidebar = ({
       </div>
 
       {/* Mask controls */}
-      <div className="mask-controls" style={{ display: "flex", flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+      <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
         <button 
-          onClick={() => setIsDrawingMode(prev => !prev)}
+          onClick={() => setIsDrawingMode(true)}
+          disabled={!selectedImageId || isDrawingMode}
           style={{
             width: '40px',
             height: '40px',

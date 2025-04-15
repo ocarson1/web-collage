@@ -2,6 +2,8 @@ import {React, useState} from "react"
 import PropTypes from 'prop-types';
 import './Gallery.css';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { parseCustomDateString, formatDayDate, formatTime } from './utils/dateUtils';
+
 
 const Gallery = ({ images }) => {
 
@@ -52,7 +54,9 @@ const reversedImages = [...images].reverse();
                     <img src={image.imageUrl} alt={image.metadata.title} />
                     </div>
                     <div className="caption">
-                        <h3>{image.metadata.title}</h3>
+                        <h3>{formatDayDate(parseCustomDateString(image.metadata.title))}</h3>
+                        <h3 style={{fontWeight:'400'}}>{formatTime(parseCustomDateString(image.metadata.title))}</h3>
+
                         {/* <p>{image.metadata.description}</p> */}
                     </div>
                 </div>
