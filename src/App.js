@@ -187,16 +187,9 @@ function App() {
         width: width,
         height: height,
         filter: (node) => {
-          // Example: remove the "highlight" class from all nodes
-          if (node.classList && node.classList.contains('selected-image')) {
-            console.log("STYLECHECK")
-            node.style.outline = 'none';
-          }
-        
-          if (node.classList && node.classList.contains('exclude-from-capture')) {
+          if (node.classList?.contains('exclude-from-capture')) {
             return false;
           }
-        
           return true;
         }
       })

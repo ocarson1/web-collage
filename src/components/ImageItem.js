@@ -139,6 +139,7 @@ const ImageItem = ({
           {/* When masked, show SVG path outline */}
           {image.maskPath && (
             <svg
+              className="selection-outline exclude-from-capture"
               style={{
                 position: 'absolute',
                 top: 0,
@@ -147,7 +148,7 @@ const ImageItem = ({
                 height: '100%',
                 pointerEvents: 'none',
                 zIndex: 3,
-                overflow: 'visible' // Allow the path to be visible outside the SVG bounds
+                overflow: 'hidden' // Changed from 'visible' to 'hidden' to clip the path
               }}
             >
               <path
@@ -164,6 +165,7 @@ const ImageItem = ({
           {/* When not masked, show rectangle outline */}
           {!image.maskPath && (
             <div
+              className="selection-outline exclude-from-capture"
               style={{
                 position: 'absolute',
                 top: 0,
