@@ -139,7 +139,7 @@ function App() {
   const captureRef = useRef(null);
 
   const handleDownload = () => {
-    const node = captureRef.current;
+    const node = document.querySelector('.image-generator-container');
 
     if (!node) {
       console.error("Element to capture is not found!");
@@ -157,16 +157,24 @@ function App() {
   }
 
   const handleCaptureAndSave = () => {
-    const node = document.querySelector('.canvas-container');
-
-    if (!node) {
-      console.error("Element to capture is not found!");
+    const node = document.querySelector('.image-generator-container');
+    const canvasContainer = document.querySelector('.canvas-container');
+  
+    if (!node || !canvasContainer) {
+      console.error("Required elements not found!");
       return;
     }
-
+  
+    // Get computed dimensions of the canvas container
+    const computedStyle = window.getComputedStyle(canvasContainer);
+    const width = parseInt(computedStyle.width, 10);
+    const height = parseInt(computedStyle.height, 10);
+  
     domtoimage
       .toBlob(node, {
         bgcolor: color,
+        width: width,
+        height: height,
         filter: (node) => {
           // Example: remove the "highlight" class from all nodes
           if (node.classList && node.classList.contains('selected-image')) {
@@ -181,32 +189,31 @@ function App() {
           return true;
         }
       })
-      .then(async (blob) => {  // Note the async here
+      .then(async (blob) => {
         // Save the Blob as a file
-
         setFormData(prevData => ({
           ...prevData,
           image: blob,
         }))
-
+  
         const formDataToSubmit = new FormData();
         formDataToSubmit.append('image', blob, 'captured-content.png');
         formDataToSubmit.append('title', formatDate1(date));
         formDataToSubmit.append('description', 'Submitted from ' + formData.description);
-
+  
         console.log('form data', formData)
-
+  
         try {
           // Await the fetch
           const response = await fetch('https://web-collage-backend.onrender.com/upload', {
             method: 'POST',
             body: formDataToSubmit,
           });
-
+  
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-
+  
           // Await the json parsing
           const result = await response.json();
           console.log('Upload successful:', result);
@@ -220,7 +227,7 @@ function App() {
         console.error("Oops, something went wrong!", error);
       });
   };
-
+  
   function formatDate1(date) {
     return date.toLocaleString('en-US', {
       month: '2-digit',
