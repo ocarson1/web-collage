@@ -92,7 +92,19 @@ const ResponsiveImageGrid = ({ imageData, onDragStart }) => {
     <h3>{formatDayDate(date)}</h3>
     <div style={{ display: 'flex', alignItems: 'center' }}>
   <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
-  <span style={{ marginLeft: '0.5rem' }}> - US Trending</span>
+  <span style={{ marginLeft: '0.5rem' }}>
+  ·  &nbsp;<a
+    href="https://trends.google.com/trending?geo=US&hours=4"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: 'gray',
+      textDecoration: 'underline',
+    }}
+  >
+  Trending (US)
+  </a>
+</span>
 </div>    <br></br>
     <div 
       className="responsive-image-grid"
