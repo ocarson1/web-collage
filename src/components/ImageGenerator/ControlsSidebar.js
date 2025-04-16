@@ -12,32 +12,13 @@ const ControlsSidebar = ({
   setIsDrawingMode,
   clearMask
 }) => {
+
   return (
-    <div className="controls-sidebar exclude-from-capture" style={{
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      zIndex: 9999,
-      padding: '15px',
-      display: 'flex',
-      flexDirection: 'row',
-      gap: '20px'
-    }}>
+    <div className="controls-sidebar exclude-from-capture" >
       {/* Color control using hidden input */}
-      <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="color-controls" >
         <label 
-          style={{ 
-            cursor: 'pointer',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            borderRadius: '50%',
-            padding: '6px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '40px',
-            height: '40px',
-            boxSizing: 'border-box'
-          }} 
+          
           title="Pick Background Color"
         >
           <BucketIcon style={{ width: '24px', height: '24px', color: 'black' }} />
@@ -45,45 +26,20 @@ const ControlsSidebar = ({
             type="color"
             value={bgColor}
             onChange={handleColorChange}
-            style={{
-              position: 'absolute',
-              opacity: 0,
-              width: '0.1px',
-              height: '0.1px',
-              overflow: 'hidden',
-              pointerEvents: 'none'
-            }}
+           
           />
         </label>
       </div>
 
       {/* Mask controls */}
-      <div className="mask-controls" style={{ display: "flex", gap: '20px', alignItems: 'center' }}>
+      <div className="mask-controls" >
         <button 
           onClick={() => setIsDrawingMode(true)}
           disabled={!selectedImageId || isDrawingMode}
-          style={{
-            width: '40px',
-            height: '40px',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
-            opacity: selectedImageId ? 1 : 0.3,
-          }}
+         
           title="Draw Mask"
         >
-          <span style={{ 
-            backgroundColor: isDrawingMode ? 'black' : 'rgba(255, 255, 255, 0.7)',
-            borderRadius: '50%',
-            padding: '6px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '40px',
-            height: '40px',
-            boxSizing: 'border-box'
-          }}>
+          <span >
             <ScissorsIcon style={{ 
               width: '24px', 
               height: '24px', 
@@ -95,28 +51,10 @@ const ControlsSidebar = ({
         <button 
           onClick={clearMask}
           disabled={!selectedImageId}
-          style={{
-            width: '40px',
-            height: '40px',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: selectedImageId ? 'pointer' : 'default',
-            opacity: selectedImageId ? 1 : 0.3
-          }}
+          
           title="Clear Mask"
         >
-          <span style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            borderRadius: '50%',
-            padding: '6px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '40px',
-            height: '40px',
-            boxSizing: 'border-box'
-          }}>
+          <span >
             <ResetIcon style={{ width: '24px', height: '24px', color: 'black' }} />
           </span>
         </button>

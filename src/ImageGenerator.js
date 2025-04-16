@@ -90,18 +90,13 @@ const ResponsiveImageGrid = ({ imageData, onDragStart }) => {
   return (
     <div>
     <h3>{formatDayDate(date)}</h3>
-    <h3 style={{fontWeight:'400'}}>{formatTime(date)}</h3>
-    <br></br>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+  <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
+  <span style={{ marginLeft: '0.5rem' }}> - US Trending</span>
+</div>    <br></br>
     <div 
       className="responsive-image-grid"
-      style={{
-        width: '212px', // 3 columns * 100px + 2 gaps * 12px
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '12px',
-        padding: '12px',
-        justifyContent: 'flex-start'
-      }}
+      
     >
 
       {imageData.map((image, index) => (

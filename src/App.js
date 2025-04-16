@@ -137,23 +137,34 @@ function App() {
   };
 
   const captureRef = useRef(null);
-
+  
   const handleDownload = () => {
     const node = document.querySelector('.image-generator-container');
-
-    if (!node) {
-      console.error("Element to capture is not found!");
+    const canvasContainer = document.querySelector('.canvas-container');
+  
+    if (!node || !canvasContainer) {
+      console.error("Required elements not found!");
       return;
     }
-
+  
+    // Get computed dimensions of the canvas container
+    const computedStyle = window.getComputedStyle(canvasContainer);
+    const width = parseInt(computedStyle.width, 10);
+    const height = parseInt(computedStyle.height, 10);
+  
     domtoimage
       .toBlob(node, {
-        bgcolor: color
+        bgcolor: color,
+        width: width,
+        height: height
       })
       .then(async (blob) => {  // Note the async here
         // Save the Blob as a file
         saveAs(blob, "captured-content.png");
       })
+      .catch((error) => {
+        console.error("Error capturing image:", error);
+      });
   }
 
   const handleCaptureAndSave = () => {
@@ -227,7 +238,7 @@ function App() {
         console.error("Oops, something went wrong!", error);
       });
   };
-  
+
   function formatDate1(date) {
     return date.toLocaleString('en-US', {
       month: '2-digit',

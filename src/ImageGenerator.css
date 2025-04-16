@@ -3,6 +3,7 @@
   display: flex;
   width: 100%;
   max-width: 100%;
+
   /* height: 80vh; */
 }
 
@@ -12,6 +13,59 @@
   justify-content: center;
 }
 
+
+.responsive-image-grid {
+  width: 212px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  justify-content: flex-start;
+
+}
+
+
+@media (max-width: 768px) {
+  /* styles for screens smaller than 768px */
+/* Add these new styles to your CSS */
+.app-sub-container {
+  flex-direction: column;
+  
+  /* height: 80vh; */
+}
+
+.responsive-image-grid {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px,;
+  padding: 12px,;
+  justify-content: flex-start;
+}
+
+  .canvas-container {
+    min-width: 200px;
+    width: 100%;
+    height: 80%;
+    max-width: 80%;
+    max-height: 80%;
+  
+    position: relative;
+    overflow: hidden;
+    border: 1px solid;
+  
+    resize:both;
+  margin: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+  }
+
+}
+
+
+
+
+
 .canvas-section {
   position: relative;
   flex: 2;
@@ -19,7 +73,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-
 }
 
 .canvas-container {

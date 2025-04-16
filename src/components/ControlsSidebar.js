@@ -4,6 +4,8 @@ import { ReactComponent as BucketIcon } from './bucket.svg';
 import { ReactComponent as ScissorsIcon } from './scissors.svg';
 import { ReactComponent as ResetIcon } from './reset.svg';
 
+import './ControlsSidebar.css';
+
 const ControlsSidebar = ({
   bgColor,
   handleColorChange,
@@ -13,16 +15,7 @@ const ControlsSidebar = ({
   clearMask
 }) => {
   return (
-    <div className="controls-sidebar exclude-from-capture" style={{
-      // position: 'absolute',
-      top: 0,
-      right: 0,
-      zIndex: 9999,
-      padding: '15px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '20px'
-    }}>
+    <div className="controls-sidebar exclude-from-capture" >
       {/* Color control using hidden input */}
       <div className="color-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <label 
