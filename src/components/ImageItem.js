@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 
 const ImageItem = ({ 
@@ -6,14 +6,33 @@ const ImageItem = ({
   shiftPressed, 
   borderColor, 
   selectedImageId, 
-//   isDrawingMode,
   onDragStart, 
   onResizeStart, 
   onContextMenu,
   preventDragHandler 
 }) => {
+  const pathRef = useRef(null);
+  const [maskBounds, setMaskBounds] = useState(null);
+  
+  // Calculate mask bounding box when the path or selection changes
+  useEffect(() => {
+    if (image.maskPath && selectedImageId === image.id && pathRef.current) {
+      // Get the bounding box of the SVG path
+      const bbox = pathRef.current.getBBox();
+      setMaskBounds({
+        x: bbox.x,
+        y: bbox.y,
+        width: bbox.width,
+        height: bbox.height
+      });
+    } else if (!image.maskPath || selectedImageId !== image.id) {
+      setMaskBounds(null);
+    }
+  }, [image.maskPath, selectedImageId, image.id]);
+
   return (
     <div
+      data-image-id={image.id}
       className={`draggable-image ${selectedImageId === image.id ? 'selected-image' : ''}`}
       style={{
         left: `${image.position.x}px`,
@@ -21,21 +40,24 @@ const ImageItem = ({
         width: `${image.width}px`,
         height: `${image.height}px`,
         zIndex: image.zIndex || 1,
-        outline: selectedImageId === image.id ? '2px dashed black' : 'none',
-        position: 'absolute'
+        position: 'absolute',
+        pointerEvents: image.maskPath ? 'none' : 'auto'
       }}
-      onMouseDown={(e) => onDragStart(e, image.id)}
-      onContextMenu={(e) => onContextMenu(e, image.id)}
+      onMouseDown={image.maskPath ? null : (e) => onDragStart(e, image.id)}
+      onContextMenu={image.maskPath ? null : (e) => onContextMenu(e, image.id)}
     >
-      {/* This inner div will handle the mask */}
+      {/* This inner div will handle the mask and its pointer events */}
       <div 
         className="image-content"
         style={{ 
           width: '100%', 
           height: '100%',
           position: 'relative',
-          clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none'
+          clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none',
+          pointerEvents: image.maskPath ? 'auto' : 'none'
         }}
+        onMouseDown={image.maskPath ? (e) => onDragStart(e, image.id) : null}
+        onContextMenu={image.maskPath ? (e) => onContextMenu(e, image.id) : null}
       >
         <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
           {shiftPressed ? (
@@ -100,18 +122,65 @@ const ImageItem = ({
         </div>
       </div>
       
-      {/* Resize handle outside of masked content */}
+      {/* Selection visuals - separate from the interactive elements */}
+      {selectedImageId === image.id && (
+        <>
+          {/* When masked, show SVG path outline */}
+          {image.maskPath && (
+            <svg
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: 3
+              }}
+            >
+              <path
+                ref={pathRef}
+                d={image.maskPath}
+                fill="none"
+                stroke="black"
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+            </svg>
+          )}
+          
+          {/* When not masked, show rectangle outline */}
+          {!image.maskPath && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                border: '2px dashed black',
+                boxSizing: 'border-box',
+                pointerEvents: 'none',
+                zIndex: 3
+              }}
+            />
+          )}
+        </>
+      )}
+      
+      {/* Resize handle - positioned based on mask bounds when applicable */}
       <div 
         className="resize-handle exclude-from-capture"
         style={{
           position: 'absolute',
-          bottom: 0,
-          right: 0,
+          bottom: maskBounds ? `${image.height - (maskBounds.y + maskBounds.height)}px` : '0',
+          right: maskBounds ? `${image.width - (maskBounds.x + maskBounds.width)}px` : '0',
           width: '15px',
           height: '15px',
           background: 'rgba(255,255,255,0.5)',
           cursor: 'nwse-resize',
-          zIndex: 9999999
+          zIndex: 9999999,
+          pointerEvents: 'auto'
         }}
         onMouseDown={(e) => {
           e.stopPropagation(); // Prevent propagation to parent drag handler
@@ -141,7 +210,7 @@ ImageItem.propTypes = {
   shiftPressed: PropTypes.bool.isRequired,
   borderColor: PropTypes.string,
   selectedImageId: PropTypes.number,
-  isDrawingMode: PropTypes.bool.isRequired,
+  isDrawingMode: PropTypes.bool,
   onDragStart: PropTypes.func.isRequired,
   onResizeStart: PropTypes.func.isRequired,
   onContextMenu: PropTypes.func.isRequired,

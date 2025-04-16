@@ -52,37 +52,38 @@ const ControlsSidebar = ({
 
       {/* Mask controls */}
       <div className="mask-controls" style={{ display: "flex", flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-        <button 
-          onClick={() => setIsDrawingMode(prev => !prev)}
-          style={{
-            width: '40px',
-            height: '40px',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
-            opacity: selectedImageId ? 1 : 0.3,
-          }}
-          title="Draw Mask"
-        >
-          <span style={{ 
-            backgroundColor: isDrawingMode ? 'black' : 'rgba(255, 255, 255, 0.7)',
-            borderRadius: '50%',
-            padding: '6px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '40px',
-            height: '40px',
-            boxSizing: 'border-box'
-          }}>
-            <ScissorsIcon style={{ 
-              width: '24px', 
-              height: '24px', 
-              color: isDrawingMode ? 'white' : 'black' 
-            }} />
-          </span>
-        </button>
+      <button 
+  onClick={() => setIsDrawingMode(prev => !prev)}
+  disabled={!selectedImageId}
+  style={{
+    width: '40px',
+    height: '40px',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    cursor: selectedImageId && !isDrawingMode ? 'pointer' : 'default',
+    opacity: selectedImageId ? 1 : 0.3,
+  }}
+  title="Draw Mask"
+>
+  <span style={{ 
+    backgroundColor: isDrawingMode ? 'black' : 'rgba(255, 255, 255, 0.7)',
+    borderRadius: '50%',
+    padding: '6px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '40px',
+    height: '40px',
+    boxSizing: 'border-box'
+  }}>
+    <ScissorsIcon style={{ 
+      width: '24px', 
+      height: '24px', 
+      color: isDrawingMode ? 'white' : 'black' 
+    }} />
+  </span>
+</button>
 
         <button 
           onClick={clearMask}

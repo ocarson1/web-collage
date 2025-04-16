@@ -762,15 +762,15 @@ const handleResizeStart = (e, imageId) => {
   };
   
   // Remove mask from selected image
-  const clearMask = () => {
-    if (!selectedImageId) return;
-    
-    setImages(prev => prev.map(img => 
-      img.id === selectedImageId 
-        ? { ...img, maskPath: null, originalMaskPath: null }
-        : img
-    ));
-  };
+ // Delete the selected image
+const deleteImage = () => {
+  if (!selectedImageId) return;
+  
+  setImages(prev => prev.filter(img => img.id !== selectedImageId));
+  
+  // Reset selected image since we're deleting it
+  setSelectedImageId(null);
+};
 
   // Global event listeners (modified to include drop handlers)
   useEffect(() => {
@@ -879,7 +879,7 @@ const handleResizeStart = (e, imageId) => {
           isDrawingMode={isDrawingMode}
           selectedImageId={selectedImageId}
           setIsDrawingMode={setIsDrawingMode}
-          clearMask={clearMask}
+          clearMask={deleteImage}
         />
       </div>
     </div>
