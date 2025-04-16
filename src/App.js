@@ -137,7 +137,7 @@ function App() {
   };
 
   const captureRef = useRef(null);
-  
+
   const handleDownload = () => {
     const node = document.querySelector('.image-generator-container');
     const canvasContainer = document.querySelector('.canvas-container');
@@ -351,14 +351,15 @@ function App() {
 
           <div className="content-section">
             <div className="grid-container">
+            <div>
+            </div>
               <div style={{ lineHeight: "1.25" }}>
                 <Instructions color={textColor} />
               </div>
               <div>
                 {/* Color controls moved to ImageGenerator */}
               </div>
-              <div>
-              </div>
+              
             </div>
 
           </div>

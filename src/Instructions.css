@@ -1,9 +1,9 @@
 .instructions-container {
-    max-width: 42rem;
+    text-align: right;
+    font-style: italic;
   }
   
   .tabs-container {
-    display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
 

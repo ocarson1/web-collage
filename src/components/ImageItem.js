@@ -14,21 +14,32 @@ const ImageItem = ({
   const pathRef = useRef(null);
   const [maskBounds, setMaskBounds] = useState(null);
   
-  // Calculate mask bounding box when the path or selection changes
+  // Calculate mask bounding box when the path changes or component mounts
   useEffect(() => {
-    if (image.maskPath && selectedImageId === image.id && pathRef.current) {
-      // Get the bounding box of the SVG path
-      const bbox = pathRef.current.getBBox();
+    if (image.maskPath) {
+      // Create a temporary SVG to calculate the bounds without needing selection
+      const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const tempPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      tempPath.setAttribute("d", image.maskPath);
+      tempSvg.appendChild(tempPath);
+      document.body.appendChild(tempSvg);
+      
+      // Get the bounding box
+      const bbox = tempPath.getBBox();
+      
+      // Clean up
+      document.body.removeChild(tempSvg);
+      
       setMaskBounds({
         x: bbox.x,
         y: bbox.y,
         width: bbox.width,
         height: bbox.height
       });
-    } else if (!image.maskPath || selectedImageId !== image.id) {
+    } else {
       setMaskBounds(null);
     }
-  }, [image.maskPath, selectedImageId, image.id]);
+  }, [image.maskPath]);
 
   return (
     <div
@@ -135,7 +146,8 @@ const ImageItem = ({
                 width: '100%',
                 height: '100%',
                 pointerEvents: 'none',
-                zIndex: 3
+                zIndex: 3,
+                overflow: 'visible' // Allow the path to be visible outside the SVG bounds
               }}
             >
               <path

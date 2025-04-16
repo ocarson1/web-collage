@@ -2,8 +2,8 @@
 
 .gallery-section {
   position: relative;
-  padding-left: 2vw;
-  padding-right: 2vw;
+  padding-left: 20px;
+  padding-right: 20px;
   display:block;
 
 }
@@ -18,7 +18,7 @@
     width: 100%;
 
     grid-template-columns: 1fr 1fr 1fr 1fr; /* Creates 3 equal columns */
-    gap: 50px; /* Adds space between columns */
+    gap: 40px; /* Adds space between columns */
   }
   
   .grid-item {
@@ -74,8 +74,8 @@
 
     .gallery-section {
       position: relative;
-      padding-left: 2vw;
-      padding-right: 2vw;
+      padding-left: 20px;
+      padding-right: 20px;
       display:block;
   }
   

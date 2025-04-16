@@ -100,14 +100,13 @@ img {
 }
 
 .content-section {
-  min-height: 20vh; /* Full viewport height for content */
   padding-left: 20px;
   padding-right: 20px;
 }
 
 .grid-container {
   display: grid;
-  grid-template-columns: 2fr 1fr; 
+  grid-template-columns: 1fr 2fr; 
   gap: 10px; /* Adds space between columns */
   margin: auto;
 }
@@ -134,12 +133,32 @@ img {
 
 }
 
-button {
-  font-size: 16px;
+
+
+.options button {
+  background-color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
   width: 8em;
   height: 100%;
-  padding: 0.25em;
+  padding: 0.75rem 0.75rem;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid lightgrey;
+  /* border: none; */
 }
+
+.options button:hover {
+  background-color: lightgrey
+}
+
+.options .button-submit {
+
+  padding: 0.75rem 8rem;
+
+}
+
 
 .buttons {
   gap: 0.5em;
@@ -147,7 +166,6 @@ button {
   align-items: end;
   justify-content: right;
   flex-direction: row;
-  padding-right: 200px;
 }
 
 .button-download {

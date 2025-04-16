@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ReactComponent as BucketIcon } from './bucket.svg';
 import { ReactComponent as ScissorsIcon } from './scissors.svg';
-import { ReactComponent as ResetIcon } from './reset.svg';
+import { ReactComponent as TrashIcon } from './trash.svg';
 
 import './ControlsSidebar.css';
 
@@ -23,7 +23,6 @@ const ControlsSidebar = ({
             cursor: 'pointer',
             backgroundColor: 'rgba(255, 255, 255, 0.7)',
             borderRadius: '50%',
-            padding: '6px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -51,7 +50,7 @@ const ControlsSidebar = ({
       </div>
 
       {/* Mask controls */}
-      <div className="mask-controls" style={{ display: "flex", flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+      <div className="mask-controls" >
       <button 
   onClick={() => setIsDrawingMode(prev => !prev)}
   disabled={!selectedImageId}
@@ -110,7 +109,7 @@ const ControlsSidebar = ({
             height: '40px',
             boxSizing: 'border-box'
           }}>
-            <ResetIcon style={{ width: '24px', height: '24px', color: 'black' }} />
+            <TrashIcon style={{ width: '24px', height: '24px', color: 'black' }} />
           </span>
         </button>
       </div>

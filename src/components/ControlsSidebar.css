@@ -1,3 +1,22 @@
+
+.controls-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+
+}
+
+
+.mask-controls {
+display: flex;
+flex-direction: column;
+gap: 20px;
+align-items: center;
+
+}
+
+
 .button-container {
     display: flex;
     flex-direction: row;
@@ -24,7 +43,23 @@
   
   /* Media Query for screens 786px and below */
   @media (max-width: 786px) {
+
+    .mask-controls {
+      flex-direction: row;
+
+ 
+      
+      }
+      
     .button-container {
       flex-direction: column;
+    }
+
+    .controls-sidebar {
+      flex-direction: row;
+      justify-content: center;
+
+    
+    
     }
   }
