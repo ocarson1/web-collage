@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ReactComponent as ResizeIcon } from './resize.svg';
 
 const ImageItem = ({ 
   image, 
@@ -41,10 +42,19 @@ const ImageItem = ({
     }
   }, [image.maskPath]);
 
+  // Handle click on link without triggering drag
+  const handleLinkClick = (e) => {
+    // Don't stop propagation, but prevent default to avoid interfering with the link
+    e.stopPropagation();
+  };
+
+  // Check if this image is currently selected
+  const isSelected = selectedImageId === image.id;
+
   return (
     <div
       data-image-id={image.id}
-      className={`draggable-image ${selectedImageId === image.id ? 'selected-image' : ''}`}
+      className={`draggable-image ${isSelected ? 'selected-image' : ''}`}
       style={{
         left: `${image.position.x}px`,
         top: `${image.position.y}px`,
@@ -52,9 +62,20 @@ const ImageItem = ({
         height: `${image.height}px`,
         zIndex: image.zIndex || 1,
         position: 'absolute',
-        pointerEvents: image.maskPath ? 'none' : 'auto'
+        // Restore original behavior: parent has no pointer events when masked
+        pointerEvents: image.maskPath ? 'none' : 'auto',
+        // Prevent text selection
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none'
       }}
-      onMouseDown={image.maskPath ? null : (e) => onDragStart(e, image.id)}
+      onMouseDown={image.maskPath ? null : (e) => {
+        // Only initiate drag if we're not clicking on a link
+        if (e.target.tagName !== 'A') {
+          onDragStart(e, image.id);
+        }
+      }}
       onContextMenu={image.maskPath ? null : (e) => onContextMenu(e, image.id)}
     >
       {/* This inner div will handle the mask and its pointer events */}
@@ -65,9 +86,20 @@ const ImageItem = ({
           height: '100%',
           position: 'relative',
           clipPath: image.maskPath ? `url(#mask-${image.id})` : 'none',
-          pointerEvents: image.maskPath ? 'auto' : 'none'
+          // Restore original behavior: only this div gets pointer events when masked
+          pointerEvents: image.maskPath ? 'auto' : 'none',
+          // Prevent text selection
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none'
         }}
-        onMouseDown={image.maskPath ? (e) => onDragStart(e, image.id) : null}
+        onMouseDown={image.maskPath ? (e) => {
+          // Only initiate drag if we're not clicking on a link
+          if (e.target.tagName !== 'A') {
+            onDragStart(e, image.id);
+          }
+        } : null}
         onContextMenu={image.maskPath ? (e) => onContextMenu(e, image.id) : null}
       >
         <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
@@ -79,7 +111,12 @@ const ImageItem = ({
               boxSizing: 'border-box',
               position: 'relative',
               padding: '10px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              // Prevent text selection
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none'
             }}>
               <div 
                 style={{
@@ -99,6 +136,7 @@ const ImageItem = ({
                 href={image.newsItemUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                onClick={handleLinkClick}
                 style={{ 
                   color: `${borderColor}`, 
                   textDecoration: 'underline', 
@@ -106,7 +144,15 @@ const ImageItem = ({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  display: 'block'
+                  display: 'block',
+                  position: 'relative',
+                  zIndex: 10,
+                  pointerEvents: 'auto',
+                  // Allow text selection ONLY for the link
+                  userSelect: 'text',
+                  WebkitUserSelect: 'text',
+                  MozUserSelect: 'text',
+                  msUserSelect: 'text'
                 }}
               >
                 {image.newsItemUrl}
@@ -134,7 +180,7 @@ const ImageItem = ({
       </div>
       
       {/* Selection visuals - separate from the interactive elements */}
-      {selectedImageId === image.id && (
+      {isSelected && (
         <>
           {/* When masked, show SVG path outline */}
           {image.maskPath && (
@@ -148,7 +194,7 @@ const ImageItem = ({
                 height: '100%',
                 pointerEvents: 'none',
                 zIndex: 3,
-                overflow: 'hidden' // Changed from 'visible' to 'hidden' to clip the path
+                overflow: 'hidden'
               }}
             >
               <path
@@ -172,35 +218,39 @@ const ImageItem = ({
                 left: 0,
                 width: '100%',
                 height: '100%',
-                border: '2px dashed black',
+                border: '1.5px dashed black',
                 boxSizing: 'border-box',
                 pointerEvents: 'none',
                 zIndex: 3
               }}
             />
           )}
+          
+          {/* Resize handle - only visible when image is selected */}
+          <div 
+            className="resize-handle exclude-from-capture"
+            style={{
+              position: 'absolute',
+              bottom: maskBounds ? `${image.height - (maskBounds.y + maskBounds.height)}px` : '0',
+              right: maskBounds ? `${image.width - (maskBounds.x + maskBounds.width)}px` : '0',
+              width: '12px',
+              height: '12px',
+              cursor: 'nwse-resize',
+              zIndex: 9999999,
+              pointerEvents: 'auto',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation(); // Prevent propagation to parent drag handler
+              onResizeStart(e, image.id);
+            }}
+          >
+            <ResizeIcon width="15" height="15" />
+          </div>
         </>
       )}
-      
-      {/* Resize handle - positioned based on mask bounds when applicable */}
-      <div 
-        className="resize-handle exclude-from-capture"
-        style={{
-          position: 'absolute',
-          bottom: maskBounds ? `${image.height - (maskBounds.y + maskBounds.height)}px` : '0',
-          right: maskBounds ? `${image.width - (maskBounds.x + maskBounds.width)}px` : '0',
-          width: '15px',
-          height: '15px',
-          background: 'rgba(255,255,255,0.5)',
-          cursor: 'nwse-resize',
-          zIndex: 9999999,
-          pointerEvents: 'auto'
-        }}
-        onMouseDown={(e) => {
-          e.stopPropagation(); // Prevent propagation to parent drag handler
-          onResizeStart(e, image.id);
-        }}
-      />
     </div>
   );
 };

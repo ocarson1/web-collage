@@ -89,6 +89,7 @@ const ResponsiveImageGrid = ({ imageData, onDragStart }) => {
   
   return (
     <div>
+      <h3 style={{color:'gray', fontWeight: 400}}>webcollage.xyz</h3>
     <h3>{formatDayDate(date)}</h3>
     <div style={{ display: 'flex', alignItems: 'center' }}>
   <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
@@ -271,60 +272,66 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
   };
 
   // New handler for dropping images from the menu
-  const handleDrop = async (e) => {
-    e.preventDefault();
-    if (isDrawingMode) return;
+ // New handler for dropping images from the menu
+const handleDrop = async (e) => {
+  e.preventDefault();
+  if (isDrawingMode) return;
+  
+  try {
+    // Get the JSON data from the drag event
+    const jsonData = e.dataTransfer.getData('application/json');
     
-    try {
-      // Get the JSON data from the drag event
-      const jsonData = e.dataTransfer.getData('application/json');
-      
-      if (!jsonData) return;
-      
-      const imageInfo = JSON.parse(jsonData);
-      
-      // Get the position where the image was dropped
-      const container = document.querySelector('.image-generator-container');
-      if (!container) return;
-      
-      const rect = container.getBoundingClientRect();
-      const position = {
-        x: e.clientX - rect.left - 100,  // Offset for better positioning
-        y: e.clientY - rect.top - 100
-      };
-      
-      // Get dimensions of the image
-      const dimensions = await getImageDimensions(imageInfo.src);
-      
-      // Create a new image object
-      const newMaxZIndex = maxZIndex + 1;
-      setMaxZIndex(newMaxZIndex);
-      
-      const newImage = {
-        id: Date.now(),
-        position: position,
-        src: imageInfo.src,
-        parentTitle: imageInfo.parentTitle,
-        newsItemUrl: imageInfo.newsItemUrl,
-        width: dimensions.width,
-        height: dimensions.height,
-        originalWidth: dimensions.width,
-        originalHeight: dimensions.height,
-        zIndex: newMaxZIndex,
-        triggerKey: imageInfo.triggerKey,
-        maskPath: null,
-        originalMaskPath: null
-      };
-      
-      // Add the new image to the canvas
-      setImages(prev => [...prev, newImage]);
-      
-      // Trigger any additional actions (e.g., sound effect)
-      if (onSendBang) onSendBang();
-    } catch (error) {
-      console.error('Error handling drop:', error);
-    }
-  };
+    if (!jsonData) return;
+    
+    const imageInfo = JSON.parse(jsonData);
+    
+    // Get the position where the image was dropped
+    const container = document.querySelector('.image-generator-container');
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const position = {
+      x: e.clientX - rect.left - 100,  // Offset for better positioning
+      y: e.clientY - rect.top - 100
+    };
+    
+    // Get dimensions of the image
+    const dimensions = await getImageDimensions(imageInfo.src);
+    
+    // Create a new image object
+    const newMaxZIndex = maxZIndex + 1;
+    setMaxZIndex(newMaxZIndex);
+    
+    const newImageId = Date.now();
+    
+    const newImage = {
+      id: newImageId,
+      position: position,
+      src: imageInfo.src,
+      parentTitle: imageInfo.parentTitle,
+      newsItemUrl: imageInfo.newsItemUrl,
+      width: dimensions.width,
+      height: dimensions.height,
+      originalWidth: dimensions.width,
+      originalHeight: dimensions.height,
+      zIndex: newMaxZIndex,
+      triggerKey: imageInfo.triggerKey,
+      maskPath: null,
+      originalMaskPath: null
+    };
+    
+    // Add the new image to the canvas
+    setImages(prev => [...prev, newImage]);
+    
+    // Set the new image as selected
+    setSelectedImageId(newImageId);
+    
+    // Trigger any additional actions (e.g., sound effect)
+    if (onSendBang) onSendBang();
+  } catch (error) {
+    console.error('Error handling drop:', error);
+  }
+};
   
   // Allow the container to accept drops
   const handleDragOver = (e) => {

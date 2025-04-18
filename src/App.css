@@ -150,7 +150,7 @@ img {
 }
 
 .options button:hover {
-  background-color: lightgrey
+  background-color: rgb(232, 232, 232)
 }
 
 .options .button-submit {
