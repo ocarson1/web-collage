@@ -141,7 +141,7 @@ function DynamicGallery() {
           </div>
           
           <div className="text-area">
-          <h2 style={{fontWeight: '400'}}>Submit yours:</h2>
+          <h2 style={{fontWeight: '400'}}>Submit yours!</h2>
             <h2>webcollage.xyz</h2>
           </div>
         </div>
