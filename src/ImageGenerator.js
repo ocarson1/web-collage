@@ -158,19 +158,7 @@ const ImageGenerator = ({ imageData, borderColor, onSendBang, onColorChange, bgC
         setShiftPressed(true);
       }
       
-      // Toggle drawing mode with 'M' key
-      if (e.key === 'm' && selectedImageId) {
-        setIsDrawingMode(prev => !prev);
-        if (isDrawingMode) {
-          setCurrentPath([]);
-        }
-      }
-      
-      // ESC key to exit drawing mode
-      if (e.key === 'Escape' && isDrawingMode) {
-        setIsDrawingMode(false);
-        setCurrentPath([]);
-      }
+
     };
 
     const handleKeyUp = (e) => {
@@ -353,6 +341,9 @@ const handleDrop = async (e) => {
     if (e.target.classList.contains('image-generator-container')) {
       setSelectedImageId(null);
     }
+
+    setShiftPressed(false);
+console.log("SHIFT", shiftPressed)
   };
   
 

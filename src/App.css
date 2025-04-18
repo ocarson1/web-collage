@@ -8,6 +8,17 @@ body {
   
 }
 
+/* Hide scrollbar for WebKit-based browsers */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Optional: Still allow scrolling */
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
 h1, h2 {
   font-size:1.25rem;
   margin:0;

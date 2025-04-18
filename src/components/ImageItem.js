@@ -105,7 +105,7 @@ const ImageItem = ({
         <div className="image-wrapper" style={{ width: '100%', height: '100%' }}>
           {shiftPressed ? (
             <div className="image-metadata" style={{
-              border: `2px solid ${borderColor}`,
+              border: `1px solid ${borderColor}`,
               width: '100%',
               height: '100%',
               boxSizing: 'border-box',
@@ -218,7 +218,7 @@ const ImageItem = ({
                 left: 0,
                 width: '100%',
                 height: '100%',
-                border: '1.5px dashed black',
+                border: `1.5px dashed ${borderColor}`,
                 boxSizing: 'border-box',
                 pointerEvents: 'none',
                 zIndex: 3
@@ -247,7 +247,7 @@ const ImageItem = ({
               onResizeStart(e, image.id);
             }}
           >
-            <ResizeIcon width="15" height="15" />
+            <ResizeIcon width="15" height="15" color={borderColor} />
           </div>
         </>
       )}
