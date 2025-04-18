@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Gallery from './Gallery.js';
 import Instructions from './Instructions.js';
 import LatestImage from './LatestImage.js'; // Import the new component
-import BackWall from './BackWall.js';
+import DynamicGallery from './DynamicGallery.js';
 
 import './App.css';
 import domtoimage from 'dom-to-image';
@@ -313,7 +313,7 @@ function App() {
 
           <Routes>
             <Route path="/latest" element={<LatestImage />} />
-            <Route path="/back-wall" element={<BackWall />} />
+            <Route path="/dynamic-gallery" element={<DynamicGallery />} />
 
             <Route path="/gallery" element={<Gallery images={galImages} fetchGallery={fetchGallery} />} />
             <Route path="/" element={
