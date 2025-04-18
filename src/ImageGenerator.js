@@ -88,8 +88,8 @@ const ResponsiveImageGrid = ({ imageData, onDragStart }) => {
     }, []); // Empty dependency array means this runs once on component mount
   
   return (
-    <div>
-      <h3 style={{color:'gray', fontWeight: 400}}>webcollage.xyz</h3>
+    <div style={{textAlign: 'left'}}>
+      <h3 style={{color:'gray', fontWeight: 400, textAlign: 'left'}}>webcollage.xyz</h3>
     <h3>{formatDayDate(date)}</h3>
     <div style={{ display: 'flex', alignItems: 'center' }}>
   <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>

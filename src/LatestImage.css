@@ -1,0 +1,77 @@
+.latest-image-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .latest-image-container img {
+    border: 1px solid white;
+    max-width: 100%;
+    max-height: 600px;
+  }
+  
+  .latest-image-container.dark-theme {
+    color: #ffffff;
+  }
+  
+  .image-display {
+    margin: 20px 0;
+  }
+  
+ 
+  
+  .loading, .error, .no-images {
+    padding: 20px;
+    border-radius: 4px;
+    margin: 20px 0;
+  }
+  
+  .loading {
+    background-color: #333333;
+  }
+  
+  .error {
+    background-color: #660000;
+    color: #ffcccc;
+  }
+  
+  .no-images {
+    background-color: #333333;
+    color: #cccccc;
+  }
+  
+  .refresh-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .refresh-button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Dark theme specific styles */
+  .dark-theme .loading {
+    background-color: #333333;
+    color: #ffffff;
+  }
+  
+  .dark-theme .error {
+    background-color: #660000;
+    color: #ffcccc;
+  }
+  
+  .dark-theme .no-images {
+    background-color: #333333;
+    color: #cccccc;
+  }
