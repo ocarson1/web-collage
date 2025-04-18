@@ -43,6 +43,7 @@
   .grid-image-d {
     object-fit:scale-down;
     display: block;
+    border: 1px solid white;
   }
   
   .grid-caption {
