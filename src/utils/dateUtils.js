@@ -8,26 +8,35 @@
  * @returns {Date} - A JavaScript Date object.
  */
 export function parseCustomDateString(dateString) {
-    try {
-      const [datePart, timePart] = dateString.split(', ');
-      if (!datePart || !timePart) return dateString;
-  
-      const [month, day, year] = datePart.split('.');
-      if (!month || !day || !year) return dateString;
-  
-      const dateTimeString = `${year}-${month}-${day} ${timePart}`;
-      const parsedDate = new Date(dateTimeString);
-  
-      // Check if the resulting Date is valid
-      if (isNaN(parsedDate.getTime())) {
-        return dateString;
-      }
-  
-      return parsedDate;
-    } catch (e) {
+  try {
+    const [datePart, timePart] = dateString.split(', ');
+    if (!datePart || !timePart) return dateString;
+
+    const [month, day, year] = datePart.split('.');
+    if (!month || !day || !year) return dateString;
+
+    // Parse time and AM/PM
+    const timeMatch = timePart.match(/(\d+):(\d+)\s?(AM|PM)/i);
+    if (!timeMatch) return dateString;
+
+    let [hour, minute, meridiem] = timeMatch;
+    hour = parseInt(hour, 10);
+    minute = parseInt(minute, 10);
+
+    if (meridiem.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+    if (meridiem.toUpperCase() === 'AM' && hour === 12) hour = 0;
+
+    const parsedDate = new Date(year, parseInt(month, 10) - 1, parseInt(day, 10), hour, minute);
+
+    if (isNaN(parsedDate.getTime())) {
       return dateString;
     }
+
+    return parsedDate;
+  } catch (e) {
+    return dateString;
   }
+}
   /**
    * Formats a Date object into a string like "Tuesday, April 15th"
    * 

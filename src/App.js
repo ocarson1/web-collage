@@ -7,6 +7,8 @@ import Instructions from './Instructions.js';
 import LatestImage from './LatestImage.js'; // Import the new component
 import DynamicGallery from './DynamicGallery.js';
 
+import { formatDayDate, formatTime } from './utils/dateUtils.js';
+
 import './App.css';
 import domtoimage from 'dom-to-image';
 import { saveAs } from "file-saver";
@@ -378,10 +380,32 @@ function App() {
       {/* Mobile-only message */}
       {isMobile && (
         <div>
-          <p style={{ padding: "20px" }}>
-            Submit collages on desktop to this public gallery!
-          </p>
-        </div>
+          <div style={{textAlign: 'left', padding: '20px'}}>
+                <h3 style={{color:'gray', fontWeight: 400, textAlign: 'left'}}>webcollage.xyz</h3>
+              <h3>{formatDayDate(date)}</h3>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
+            <span style={{ marginLeft: '0.5rem' }}>
+            ·  &nbsp;<a
+              href="https://trends.google.com/trending?geo=US&hours=4"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: 'gray',
+                textDecoration: 'underline',
+              }}
+            >
+            Trending (US)
+            </a>
+          </span>
+          </div> 
+          <br></br>
+          <br></br>
+
+          <div>Create and submit collages on desktop</div>
+          </div></div>
+          
+
       )}
 
       {/* Gallery always appears */}

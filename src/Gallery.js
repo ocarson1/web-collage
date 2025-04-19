@@ -56,8 +56,6 @@ const reversedImages = [...images].reverse();
                     <div className="caption" style={{width: '100%',textAlign: 'left'}}>
                         <h3 style={{width: '100%', textAlign: 'left'}}>{formatDayDate(parseCustomDateString(image.metadata.title))}</h3>
                         <h3 style={{width: '100%', textAlign: 'left', fontWeight:'400'}}>{formatTime(parseCustomDateString(image.metadata.title))}</h3>
-
-                        {/* <p>{image.metadata.description}</p> */}
                     </div>
                 </div>
             ))}
