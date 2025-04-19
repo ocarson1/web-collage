@@ -7,7 +7,7 @@ function LatestImage() {
   const [displayedImages, setDisplayedImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isFading, setIsFading] = useState(false);
+  const [fadeState, setFadeState] = useState('visible'); // 'visible', 'fading-out', or 'fading-in'
 
   // Background setup
   useEffect(() => {
@@ -65,22 +65,27 @@ function LatestImage() {
     return () => socket.disconnect();
   }, []);
 
-  // Rotate all images every 30 seconds
+  // Rotate all images every 5 seconds
   useEffect(() => {
     if (allImages.length < 3) return;
     
     const rotateImages = () => {
       // Start fade out
-      setIsFading(true);
+      setFadeState('fading-out');
       
-      // After fade out completes, update images and fade back in
+      // After fade out completes, update images and start fade in
       setTimeout(() => {
         updateDisplayedImages(allImages);
-        setIsFading(false);
+        setFadeState('fading-in');
+        
+        // After fade in completes, set to visible
+        setTimeout(() => {
+          setFadeState('visible');
+        }, 600); // matches CSS transition duration
       }, 600); // matches CSS transition duration
     };
     
-    // Initial rotation after 30 seconds
+    // Initial rotation after 5 seconds
     const timeoutId = setTimeout(rotateImages, 30000);
     
     // Then set interval for subsequent rotations
@@ -99,7 +104,7 @@ function LatestImage() {
     return (
       <div 
         key={image._id} 
-        className={`image-item ${isMiddle ? 'image-main' : 'image-side'} ${isFading ? 'fade-out' : ''}`}
+        className={`image-item ${isMiddle ? 'image-main' : 'image-side'} ${fadeState === 'fading-out' ? 'fade-out' : fadeState === 'fading-in' ? 'fade-in' : ''}`}
       >
         <img 
           src={image.imageUrl}
