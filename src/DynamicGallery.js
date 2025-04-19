@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './DynamicGallery.css';
-import { parseCustomDateString, formatDayDate, formatTime } from './utils/dateUtils';
 
 function DynamicGallery() {
   const [images, setImages] = useState([]);
@@ -132,16 +131,12 @@ function DynamicGallery() {
                   alt={image.title || `Image ${index + 1}`} 
                   className="grid-image-d"
                 />
-                <div className="grid-caption">
-                  <h4>{formatDayDate(parseCustomDateString(image.metadata.title))}</h4>
-                  <h4 style={{fontWeight:'400'}}>{formatTime(parseCustomDateString(image.metadata.title))}</h4>
-                </div>
               </div>
             ))}
           </div>
           
           <div className="text-area">
-          <h2 style={{fontWeight: '400'}}>Submit yours!</h2>
+            {/* <h2 style={{fontWeight: '400'}}></h2> */}
             <h2>webcollage.xyz</h2>
           </div>
         </div>
