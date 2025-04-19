@@ -114,24 +114,21 @@ function LatestImage() {
       </div>
     );
   };
-
+  
   return (
     <div className="latest-image-container dark-theme">
-
       {loading && <div className="loading-hidden">Loading images...</div>}
       {error && <div className="error-hidden">Error: {error}</div>}
-
+  
       {!loading && !error && (
         <div className="images-gallery">
           {displayedImages.length > 0 ? (
             displayedImages.map((image, index) => renderImage(image, index))
           ) : (
-            <div style={{height: '100vh'}}></div>
+            <div className="empty-gallery"></div>
           )}
         </div>
       )}
-
-      <div style={{height: '100vh'}}></div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-/* LatestImage.css - Highly specific selectors to avoid conflicts */
+/* Revised LatestImage.css */
 
 .latest-image-container {
   padding: 20px;
@@ -8,44 +8,41 @@
 .latest-image-container.dark-theme {
   background-color: #000000;
   color: #ffffff;
-  height: 1000px;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  overflow: hidden; /* Prevent content from spilling out */
 }
 
 .latest-image-container .images-gallery {
   display: flex;
-  align-items: center;
+  align-items: center; /* Align items on the horizontal axis */
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 40px;
+  width: 100%;
+  max-width: 95vw; /* Prevent exceeding viewport width */
+  gap: 40px; /* Reduced gap */
+  position: relative; /* For consistent positioning */
 }
 
 .latest-image-container .image-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   opacity: 1;
   transition: opacity 0.6s ease;
 }
 
-.latest-image-container .image-item.fade-out {
-  opacity: 0;
-}
-
-.latest-image-container .image-item.fade-in {
-  opacity: 1;
-}
-
 .latest-image-container .image-main {
-  flex: 4;
+  width: 40%; /* Fixed width */
   order: 2;
 }
 
 .latest-image-container .image-side {
-  flex: 3;
-  max-width: 40%;
+  width: 25%; /* Fixed width */
+  max-width: 25%;
 }
 
 .latest-image-container .image-side:first-child {
@@ -57,16 +54,17 @@
 }
 
 .latest-image-container .featured-image {
-  max-width: 100%;
+  object-fit: contain; /* Maintain aspect ratio */
+  max-width: 100%; /* Don't exceed container width */
   height: auto;
 }
 
 .latest-image-container .featured-image-main {
-  max-height: 80vh;
+  max-height: 70vh; /* Prevent exceeding viewport height */
 }
 
 .latest-image-container .featured-image-side {
-  max-height: 60vh;
+  max-height: 50vh; /* Smaller height for side images */
 }
 
 .latest-image-container .loading-hidden,
@@ -82,12 +80,13 @@
   
   .latest-image-container .image-main,
   .latest-image-container .image-side {
-    max-width: 100%;
+    width: 90%;
+    max-width: 90%;
     order: unset;
   }
   
   .latest-image-container .featured-image-main,
   .latest-image-container .featured-image-side {
-    max-height: 50vh;
+    max-height: 40vh;
   }
 }
