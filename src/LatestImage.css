@@ -8,7 +8,7 @@
 .latest-image-container.dark-theme {
   background-color: #000000;
   color: #ffffff;
-  height: 100vh;
+  height: 1000px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,7 +20,6 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 40px;
-  margin-bottom: 30px;
 }
 
 .latest-image-container .image-item {
