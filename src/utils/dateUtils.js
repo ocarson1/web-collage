@@ -15,34 +15,27 @@ export function parseCustomDateString(dateString) {
     const [month, day, year] = datePart.split('.');
     if (!month || !day || !year) return dateString;
 
-    // Parse time and AM/PM
-    const timeMatch = timePart.match(/(\d+):(\d+)\s?(AM|PM)/i);
-    if (!timeMatch) return dateString;
+    const [time, meridiem] = timePart.split(' ');
+    if (!time || !meridiem) return dateString;
 
-    let [hour, minute, meridiem] = timeMatch;
-    hour = parseInt(hour, 10);
-    minute = parseInt(minute, 10);
+    let [hour, minute] = time.split(':').map(Number);
+    if (isNaN(hour) || isNaN(minute)) return dateString;
 
-    if (meridiem.toUpperCase() === 'PM' && hour !== 12) hour += 12;
-    if (meridiem.toUpperCase() === 'AM' && hour === 12) hour = 0;
-
-    const parsedDate = new Date(year, parseInt(month, 10) - 1, parseInt(day, 10), hour, minute);
-
-    if (isNaN(parsedDate.getTime())) {
-      return dateString;
+    if (meridiem.toUpperCase() === 'PM' && hour !== 12) {
+      hour += 12;
+    } else if (meridiem.toUpperCase() === 'AM' && hour === 12) {
+      hour = 0;
     }
 
-    return parsedDate;
+    const isoString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+
+    const parsedDate = new Date(isoString);
+
+    return isNaN(parsedDate.getTime()) ? dateString : parsedDate;
   } catch (e) {
     return dateString;
   }
 }
-  /**
-   * Formats a Date object into a string like "Tuesday, April 15th"
-   * 
-   * @param {Date} date - The Date object to format.
-   * @returns {string} - The formatted date string.
-   */
   export function formatDayDate(date) {
     try {
         const options = {
