@@ -402,7 +402,7 @@ function App() {
           <br></br>
           <br></br>
 
-          <div>Create and submit collages on desktop</div>
+          <div>Create and submit collages on desktop:</div>
           </div></div>
           
 
