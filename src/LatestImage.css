@@ -11,6 +11,10 @@
   .latest-image-container.dark-theme {
     background-color: #000000;
     color: #ffffff;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .latest-image-container .images-gallery {

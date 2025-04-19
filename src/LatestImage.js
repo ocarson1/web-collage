@@ -112,7 +112,6 @@ function LatestImage() {
 
   return (
     <div className="latest-image-container dark-theme">
-      <div style={{height: '10vh'}}></div>
 
       {loading && <div className="loading-hidden">Loading images...</div>}
       {error && <div className="error-hidden">Error: {error}</div>}
