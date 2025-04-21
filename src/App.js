@@ -383,10 +383,11 @@ function App() {
           <div style={{textAlign: 'left', padding: '20px'}}>
                 <h3 style={{color:'gray', fontWeight: 400, textAlign: 'left'}}>webcollage.xyz</h3>
               <h3>{formatDayDate(date)}</h3>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
             <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
-            <span style={{ marginLeft: '0.5rem' }}>
-            ·  &nbsp;<a
+            <br></br>
+
+            <span
+            ><a
               href="https://trends.google.com/trending?geo=US&hours=4"
               target="_blank"
               rel="noopener noreferrer"
@@ -394,11 +395,9 @@ function App() {
                 color: 'gray',
                 textDecoration: 'underline',
               }}
-            >
-            Trending (US)
+            >Images sourced from Google Trends (US)
             </a>
           </span>
-          </div> 
           <br></br>
           <br></br>
 
