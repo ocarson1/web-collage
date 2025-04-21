@@ -54,6 +54,10 @@ const Instructions = ({color}) => {
       </p>
       <p>
         {/* <span className="bold">⁕&nbsp;&nbsp;</span> */}
+        Right click an image to delete it.
+      </p>
+      <p>
+        {/* <span className="bold">⁕&nbsp;&nbsp;</span> */}
         Expand an image by dragging its bottom-right corner.
       </p>
 
