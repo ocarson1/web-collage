@@ -381,7 +381,7 @@ function App() {
       {isMobile && (
         <div>
           <div style={{textAlign: 'left', padding: '20px'}}>
-                <h3 style={{color:'gray', fontWeight: 400, textAlign: 'left'}}>webcollage.xyz</h3>
+                <h3 style={{color:'gray', fontWeight: 400, textAlign: 'left'}}>We Collage</h3>
               <h3>{formatDayDate(date)}</h3>
             <h3 style={{ fontWeight: 400, margin: 0 }}>{formatTime(date)}</h3>
             <br></br>
